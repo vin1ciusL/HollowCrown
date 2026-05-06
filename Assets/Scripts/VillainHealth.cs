@@ -1,7 +1,10 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class VillainHealth : MonoBehaviour
 {
+    public static readonly List<VillainHealth> All = new();
+
     [Header("Vida")]
     public float maxHealth = 10f;
     public float currentHealth = 10f;
@@ -12,76 +15,67 @@ public class VillainHealth : MonoBehaviour
     public float attackCooldown = 1f;
 
     private float attackTimer = 0f;
+    private bool pendingDamage = false;
     private VillainAnimator villainAnimator;
-    private Rigidbody2D rb;
+    private HeroHealth heroHealth;
+
+    void OnEnable()  => All.Add(this);
+    void OnDisable() => All.Remove(this);
 
     void Start()
     {
         currentHealth = maxHealth;
         attackTimer = Random.Range(0f, attackCooldown);
         villainAnimator = GetComponent<VillainAnimator>();
-        rb = GetComponent<Rigidbody2D>();
+
+        GameObject heroObj = GameObject.FindWithTag("Player");
+        if (heroObj != null)
+            heroHealth = heroObj.GetComponent<HeroHealth>();
+
+        if (villainAnimator != null)
+            villainAnimator.OnImpactFrame += ApplyPendingDamage;
+    }
+
+    void OnDestroy()
+    {
+        if (villainAnimator != null)
+            villainAnimator.OnImpactFrame -= ApplyPendingDamage;
     }
 
     void Update()
     {
         attackTimer += Time.deltaTime;
-
         if (attackTimer >= attackCooldown)
-        {
             TryAttack();
-        }
     }
 
     void TryAttack()
     {
-        Vector2 attackDir = GetAttackDirection();
-        Vector2 attackPos = (Vector2)transform.position + attackDir * attackRange * 0.5f;
+        if (heroHealth == null) return;
 
-        Collider2D[] hits = Physics2D.OverlapCircleAll(attackPos, attackRange * 0.6f);
+        float dist = Vector2.Distance(transform.position, heroHealth.transform.position);
+        if (dist > attackRange) return;
 
-        foreach (Collider2D hit in hits)
-        {
-            HeroHealth hero = hit.GetComponent<HeroHealth>();
-            if (hero != null)
-            {
-                hero.TakeDamage(attackDamage);
-                attackTimer = 0f;
+        attackTimer = 0f;
+        pendingDamage = true;
 
-                if (villainAnimator != null)
-                    villainAnimator.TriggerAttack();
-
-                break;
-            }
-        }
+        villainAnimator?.TriggerAttack();
     }
 
-    Vector2 GetAttackDirection()
+    void ApplyPendingDamage()
     {
-        // Vilão ataca na direção do herói
-        GameObject hero = GameObject.FindWithTag("Player");
-        if (hero != null)
-        {
-            Vector2 dir = ((Vector2)hero.transform.position - (Vector2)transform.position).normalized;
-            return dir;
-        }
+        if (!pendingDamage || heroHealth == null) return;
+        pendingDamage = false;
 
-        // Fallback: direção do movimento
-        if (rb != null && rb.linearVelocity.magnitude > 0.1f)
-            return rb.linearVelocity.normalized;
-
-        return Vector2.down;
+        float dist = Vector2.Distance(transform.position, heroHealth.transform.position);
+        if (dist <= attackRange * 1.2f)
+            heroHealth.TakeDamage(attackDamage);
     }
 
     public void TakeDamage(float damage)
     {
         currentHealth -= damage;
         if (currentHealth <= 0)
-            Die();
-    }
-
-    void Die()
-    {
-        Destroy(gameObject);
+            Destroy(gameObject);
     }
 }

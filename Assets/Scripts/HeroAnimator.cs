@@ -39,6 +39,10 @@ public class HeroAnimator : MonoBehaviour
     private float attackTimer = 0f;
     private float attackDuration = 0f;
 
+    private GameObject cachedNearestVillain;
+    private float villainSearchTimer = 0f;
+    private const float VILLAIN_SEARCH_INTERVAL = 0.1f;
+
     void Start()
     {
         attackDuration = ATTACK_FRAMES_PER_ROW / attackFrameRate;
@@ -51,14 +55,29 @@ public class HeroAnimator : MonoBehaviour
         else
             HandleWalkAnimation();
 
-        // Sempre olha pro vilão mais próximo se estiver perto
-        LookAtNearestVillainIfClose();
+        villainSearchTimer += Time.deltaTime;
+        if (villainSearchTimer >= VILLAIN_SEARCH_INTERVAL)
+        {
+            villainSearchTimer = 0f;
+            RefreshNearestVillain();
+        }
+
+        // Só vira pro vilão quando parado — movimento tem prioridade
+        if (cachedNearestVillain != null && GetInput().magnitude < 0.1f)
+        {
+            float dist = Vector2.Distance(transform.position, cachedNearestVillain.transform.position);
+            if (dist < 2f)
+            {
+                Vector2 dir = ((Vector2)cachedNearestVillain.transform.position - (Vector2)transform.position).normalized;
+                lastDirection = dir;
+            }
+        }
     }
 
-    void LookAtNearestVillainIfClose()
+    void RefreshNearestVillain()
     {
         GameObject[] villains = GameObject.FindGameObjectsWithTag("Villain");
-        if (villains.Length == 0) return;
+        if (villains.Length == 0) { cachedNearestVillain = null; return; }
 
         GameObject nearest = null;
         float minDist = float.MaxValue;
@@ -66,19 +85,10 @@ public class HeroAnimator : MonoBehaviour
         foreach (GameObject v in villains)
         {
             float dist = Vector2.Distance(transform.position, v.transform.position);
-            if (dist < minDist)
-            {
-                minDist = dist;
-                nearest = v;
-            }
+            if (dist < minDist) { minDist = dist; nearest = v; }
         }
 
-        // Se o vilão mais próximo estiver dentro do alcance de ataque, vira pra ele
-        if (nearest != null && minDist < 2f)
-        {
-            Vector2 dir = ((Vector2)nearest.transform.position - (Vector2)transform.position).normalized;
-            lastDirection = dir;
-        }
+        cachedNearestVillain = nearest;
     }
 
     public void TriggerAttack()
@@ -90,33 +100,11 @@ public class HeroAnimator : MonoBehaviour
             currentFrame = 0;
             frameTimer   = 0f;
 
-            // Vira pro vilão mais próximo
-            LookAtNearestVillain();
-        }
-    }
-
-    void LookAtNearestVillain()
-    {
-        GameObject[] villains = GameObject.FindGameObjectsWithTag("Villain");
-        if (villains.Length == 0) return;
-
-        GameObject nearest = null;
-        float minDist = float.MaxValue;
-
-        foreach (GameObject v in villains)
-        {
-            float dist = Vector2.Distance(transform.position, v.transform.position);
-            if (dist < minDist)
+            if (cachedNearestVillain != null)
             {
-                minDist = dist;
-                nearest = v;
+                Vector2 dir = ((Vector2)cachedNearestVillain.transform.position - (Vector2)transform.position).normalized;
+                lastDirection = dir;
             }
-        }
-
-        if (nearest != null)
-        {
-            Vector2 dir = ((Vector2)nearest.transform.position - (Vector2)transform.position).normalized;
-            lastDirection = dir;
         }
     }
 

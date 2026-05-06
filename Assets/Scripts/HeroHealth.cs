@@ -23,67 +23,35 @@ public class HeroHealth : MonoBehaviour
     void Update()
     {
         attackTimer += Time.deltaTime;
-
         if (attackTimer >= attackCooldown)
-        {
             TryAttack();
-        }
     }
 
     void TryAttack()
     {
-        // Pega a direção que o herói está olhando
-        Vector2 attackDir = GetAttackDirection();
+        attackTimer = 0f;
 
-        // Posição do ataque na frente do herói
-        Vector2 attackPos = (Vector2)transform.position + attackDir * attackRange * 0.5f;
-
-        // Detecta inimigos numa área na frente
-        Collider2D[] hits = Physics2D.OverlapCircleAll(attackPos, attackRange * 0.6f);
-
-        foreach (Collider2D hit in hits)
+        foreach (VillainHealth villain in VillainHealth.All)
         {
-            VillainHealth villain = hit.GetComponent<VillainHealth>();
-            if (villain != null)
+            if (Vector2.Distance(transform.position, villain.transform.position) <= attackRange)
             {
                 villain.TakeDamage(attackDamage);
-                attackTimer = 0f;
-
-                if (heroAnimator != null)
-                    heroAnimator.TriggerAttack();
-
+                heroAnimator?.TriggerAttack();
                 break;
             }
         }
     }
 
-    Vector2 GetAttackDirection()
-    {
-        if (heroAnimator == null) return Vector2.down;
-        return heroAnimator.GetFacingDirection();
-    }
-
     public void TakeDamage(float damage)
     {
         currentHealth -= damage;
-        Debug.Log($"Herói levou {damage} de dano! Vida: {currentHealth}");
-
         if (currentHealth <= 0)
-            Die();
-    }
-
-    void Die()
-    {
-        Debug.Log("Herói morreu!");
-        gameObject.SetActive(false);
+            gameObject.SetActive(false);
     }
 
     void OnDrawGizmosSelected()
     {
-        if (heroAnimator == null) return;
-        Vector2 dir = heroAnimator.GetFacingDirection();
-        Vector2 pos = (Vector2)transform.position + dir * attackRange * 0.5f;
         Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(pos, attackRange * 0.6f);
+        Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 }
