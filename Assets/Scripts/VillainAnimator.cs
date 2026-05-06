@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class VillainAnimator : MonoBehaviour
@@ -9,22 +8,17 @@ public class VillainAnimator : MonoBehaviour
     [Header("Sprites - Walk Head")]
     public Sprite[] walkHeadFrames;
 
-    [Header("Sprites - Attack Body")]
-    public Sprite[] attackBodyFrames;
-
-    [Header("Sprites - Attack Head")]
-    public Sprite[] attackHeadFrames;
+    [Header("Sprites - Attack (spritesheet completa)")]
+    public Sprite[] attackFrames;
 
     [Header("Referências")]
     public SpriteRenderer bodyRenderer;
     public SpriteRenderer headRenderer;
+    public SpriteRenderer attackRenderer;
 
     [Header("Animação")]
     public float walkFrameRate = 8f;
     public float attackFrameRate = 12f;
-
-    [Tooltip("Frame em que o golpe visualmente acerta (0-based)")]
-    public int impactFrame = 3;
 
     private const int WALK_FRAMES_PER_ROW   = 6;
     private const int ATTACK_FRAMES_PER_ROW = 7;
@@ -37,23 +31,24 @@ public class VillainAnimator : MonoBehaviour
     private int currentFrame = 0;
     private float frameTimer = 0f;
     private Rigidbody2D rb;
-    private GameObject hero;
 
     [Header("Efeito de Espada")]
     public SwordEffect swordEffect;
 
+    public event System.Action OnImpactFrame;
+
     private bool isAttacking = false;
     private float attackTimer = 0f;
     private float attackDuration = 0f;
-    private int lockedDirection = DIR_DOWN;
-
-    public event Action OnImpactFrame;
 
     void Awake()
     {
         rb = GetComponentInParent<Rigidbody2D>();
         if (rb == null) rb = GetComponent<Rigidbody2D>();
-        hero = GameObject.FindWithTag("Player");
+
+        // Esconde o renderer de ataque no início
+        if (attackRenderer != null)
+            attackRenderer.enabled = false;
     }
 
     void Start()
@@ -71,38 +66,35 @@ public class VillainAnimator : MonoBehaviour
 
     public void TriggerAttack()
     {
-        if (isAttacking) return;
-
-        lockedDirection = GetDirectionToHero();
-        isAttacking  = true;
-        attackTimer  = 0f;
-        currentFrame = 0;
-        frameTimer   = 0f;
-
-        UpdateSprites(true, lockedDirection);
-
-        if (swordEffect != null && hero != null)
+        if (!isAttacking)
         {
-            Vector2 dir = ((Vector2)hero.transform.position - (Vector2)transform.position).normalized;
-            swordEffect.PlaySlash(dir);
+            isAttacking  = true;
+            attackTimer  = 0f;
+            currentFrame = 0;
+            frameTimer   = 0f;
+
+            // Mostra o renderer de ataque e esconde o de andar
+            if (attackRenderer != null) attackRenderer.enabled = true;
+            if (bodyRenderer != null)   bodyRenderer.enabled   = false;
+            if (headRenderer != null)   headRenderer.enabled   = false;
         }
     }
 
     void HandleAttackAnimation()
     {
-        int prevFrame = currentFrame;
-
         attackTimer += Time.deltaTime;
         frameTimer  += Time.deltaTime;
 
         if (frameTimer >= 1f / attackFrameRate)
         {
             frameTimer = 0f;
-            currentFrame = Mathf.Min(currentFrame + 1, ATTACK_FRAMES_PER_ROW - 1);
-            UpdateSprites(true, lockedDirection);
+            currentFrame = (currentFrame + 1) % ATTACK_FRAMES_PER_ROW;
 
-            if (currentFrame == impactFrame && prevFrame < impactFrame)
+            // Dispara o impacto no frame do meio da animação
+            if (currentFrame == ATTACK_FRAMES_PER_ROW / 2)
                 OnImpactFrame?.Invoke();
+
+            UpdateAttackSprite();
         }
 
         if (attackTimer >= attackDuration)
@@ -110,47 +102,49 @@ public class VillainAnimator : MonoBehaviour
             isAttacking  = false;
             currentFrame = 0;
             frameTimer   = 0f;
+
+            // Volta pro renderer de andar
+            if (attackRenderer != null) attackRenderer.enabled = false;
+            if (bodyRenderer != null)   bodyRenderer.enabled   = true;
+            if (headRenderer != null)   headRenderer.enabled   = true;
         }
     }
 
     void HandleWalkAnimation()
     {
-        int dir = GetDirectionToHero();
-
-        bool moving = rb != null && rb.linearVelocity.magnitude > 0.1f;
-        if (!moving)
-        {
-            currentFrame = 0;
-            UpdateSprites(false, dir);
-            return;
-        }
-
         frameTimer += Time.deltaTime;
         if (frameTimer >= 1f / walkFrameRate)
         {
             frameTimer = 0f;
             currentFrame = (currentFrame + 1) % WALK_FRAMES_PER_ROW;
-            UpdateSprites(false, dir);
+            UpdateWalkSprites();
         }
     }
 
-    void UpdateSprites(bool attacking, int direction)
+    void UpdateAttackSprite()
     {
-        int framesPerRow = attacking ? ATTACK_FRAMES_PER_ROW : WALK_FRAMES_PER_ROW;
-        int frameIndex   = direction * framesPerRow + currentFrame;
+        int direction  = GetDirection();
+        int frameIndex = direction * ATTACK_FRAMES_PER_ROW + currentFrame;
 
-        Sprite[] bodyFrames = attacking ? attackBodyFrames : walkBodyFrames;
-        Sprite[] headFrames = attacking ? attackHeadFrames : walkHeadFrames;
-
-        if (bodyFrames != null && frameIndex < bodyFrames.Length && bodyRenderer != null)
-            bodyRenderer.sprite = bodyFrames[frameIndex];
-
-        if (headFrames != null && frameIndex < headFrames.Length && headRenderer != null)
-            headRenderer.sprite = headFrames[frameIndex];
+        if (attackFrames != null && frameIndex < attackFrames.Length && attackRenderer != null)
+            attackRenderer.sprite = attackFrames[frameIndex];
     }
 
-    int GetDirectionToHero()
+    void UpdateWalkSprites()
     {
+        int direction  = GetDirection();
+        int frameIndex = direction * WALK_FRAMES_PER_ROW + currentFrame;
+
+        if (walkBodyFrames != null && frameIndex < walkBodyFrames.Length && bodyRenderer != null)
+            bodyRenderer.sprite = walkBodyFrames[frameIndex];
+
+        if (walkHeadFrames != null && frameIndex < walkHeadFrames.Length && headRenderer != null)
+            headRenderer.sprite = walkHeadFrames[frameIndex];
+    }
+
+    int GetDirection()
+    {
+        GameObject hero = GameObject.FindWithTag("Player");
         if (hero != null)
         {
             Vector2 dir = ((Vector2)hero.transform.position - (Vector2)transform.position).normalized;
@@ -160,15 +154,12 @@ public class VillainAnimator : MonoBehaviour
                 return dir.y > 0 ? DIR_UP : DIR_DOWN;
         }
 
-        if (rb != null && rb.linearVelocity.magnitude > 0.1f)
-        {
-            Vector2 vel = rb.linearVelocity;
-            if (Mathf.Abs(vel.x) > Mathf.Abs(vel.y))
-                return vel.x > 0 ? DIR_RIGHT : DIR_LEFT;
-            else
-                return vel.y > 0 ? DIR_UP : DIR_DOWN;
-        }
-
-        return DIR_DOWN;
+        if (rb == null) return DIR_DOWN;
+        Vector2 vel = rb.linearVelocity;
+        if (vel.magnitude < 0.1f) return DIR_DOWN;
+        if (Mathf.Abs(vel.x) > Mathf.Abs(vel.y))
+            return vel.x > 0 ? DIR_RIGHT : DIR_LEFT;
+        else
+            return vel.y > 0 ? DIR_UP : DIR_DOWN;
     }
 }
