@@ -37,8 +37,17 @@ public class HeroHealth : MonoBehaviour
             {
                 villain.TakeDamage(attackDamage);
                 heroAnimator?.TriggerAttack();
-                break;
+                return;
             }
+        }
+
+        // Também ataca o Mago se estiver no alcance
+        MageHealth mage = FindFirstObjectByType<MageHealth>();
+        if (mage != null && mage.gameObject.activeSelf &&
+            Vector2.Distance(transform.position, mage.transform.position) <= attackRange)
+        {
+            mage.TakeDamage(attackDamage);
+            heroAnimator?.TriggerAttack();
         }
     }
 
