@@ -7,4 +7,14 @@ public class MenuInicialManager : MonoBehaviour
     {
         SceneManager.LoadScene("Game");
     }
+
+    public void OpenHowToPlay()
+    {
+        SceneManager.LoadScene("ComoJogar");
+    }
+
+    public void BackToMenu()
+    {
+        SceneManager.LoadScene("menuinicial");
+    }
 }
