@@ -58,7 +58,6 @@ public class VillainController : MonoBehaviour
     {
         if (!heroFound || hero == null)
         {
-            // Herói não existe: fica parado
             rb.linearVelocity = Vector2.zero;
             return;
         }
@@ -67,21 +66,61 @@ public class VillainController : MonoBehaviour
 
         if (distancia > detectionRange)
         {
-            // Fora do alcance: fica parado
             rb.linearVelocity = Vector2.zero;
             return;
         }
 
         if (distancia <= stopDistance)
         {
-            // Perto demais: para (aqui você pode adicionar ataque depois)
             rb.linearVelocity = Vector2.zero;
             return;
         }
 
-        // Segue o herói
-        Vector2 direcao = ((Vector2)hero.position - rb.position).normalized;
-        rb.linearVelocity = direcao * moveSpeed;
+        Vector2 direcaoIdeal = ((Vector2)hero.position - rb.position).normalized;
+        Vector2 direcaoFinal = GetDirecaoDesviando(direcaoIdeal);
+        rb.linearVelocity = direcaoFinal * moveSpeed;
+    }
+
+    Vector2 GetDirecaoDesviando(Vector2 direcaoIdeal)
+    {
+        // Caminho direto está livre?
+        if (!EstaObstruido(direcaoIdeal, 1.2f))
+            return direcaoIdeal;
+
+        // Tenta ângulos crescentes para esquerda e direita
+        for (int angulo = 20; angulo <= 160; angulo += 20)
+        {
+            Vector2 direita = Rotacionar(direcaoIdeal, angulo);
+            if (!EstaObstruido(direita, 1.2f))
+                return direita;
+
+            Vector2 esquerda = Rotacionar(direcaoIdeal, -angulo);
+            if (!EstaObstruido(esquerda, 1.2f))
+                return esquerda;
+        }
+
+        return direcaoIdeal;
+    }
+
+    bool EstaObstruido(Vector2 direcao, float distancia)
+    {
+        RaycastHit2D[] hits = Physics2D.RaycastAll(rb.position, direcao, distancia);
+        foreach (var hit in hits)
+        {
+            if (hit.collider.gameObject == gameObject) continue;
+            if (hit.collider.isTrigger) continue;
+            if (hit.collider.CompareTag("Player")) continue;
+            return true;
+        }
+        return false;
+    }
+
+    Vector2 Rotacionar(Vector2 v, float graus)
+    {
+        float rad = graus * Mathf.Deg2Rad;
+        float cos = Mathf.Cos(rad);
+        float sin = Mathf.Sin(rad);
+        return new Vector2(cos * v.x - sin * v.y, sin * v.x + cos * v.y);
     }
 
     // Chamado quando o herói é destruído ou desativado

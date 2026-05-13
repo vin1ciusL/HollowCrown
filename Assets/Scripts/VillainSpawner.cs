@@ -9,27 +9,21 @@ public class VillainSpawner : MonoBehaviour
     public float delayEntreSpawns = 0.3f;
     public float delayAntesDeTrocar = 2f;
 
-    [Header("Turnos")]
-    public int[] inimigosPorturno = { 1, 1, 1 };
-    [Tooltip("Quantos turnos por mapa antes de trocar")]
-    public int turnosPorMapa = 3;
+    [Header("Ondas")]
+    public int[] inimigosPorturno = { 2, 3, 4 };
+    public float delayEntreOndas = 3f;
 
-    [Header("Mapas")]
-    public GameObject[] mapas;
+    [Header("Fim de Jogo")]
+    public string cenaVitoria = "menuinicial";
 
     private Camera cam;
-    private int turnoAtual = 0;   // turno global (0, 1, 2, 3, ...)
-    private int mapaAtual  = 0;   // índice do mapa ativo
+    private int ondaAtual = 0;
     private int inimigosVivos = 0;
     private bool trocando = false;
 
     void Start()
     {
         cam = Camera.main;
-
-        for (int i = 0; i < mapas.Length; i++)
-            mapas[i].SetActive(i == 0);
-
         IniciarTurno();
     }
 
@@ -37,12 +31,15 @@ public class VillainSpawner : MonoBehaviour
     {
         trocando = false;
 
-        int quantidade;
-        if (turnoAtual < inimigosPorturno.Length)
-            quantidade = inimigosPorturno[turnoAtual];
-        else
-            quantidade = inimigosPorturno[inimigosPorturno.Length - 1] + (turnoAtual - inimigosPorturno.Length + 1);
+        if (ondaAtual >= inimigosPorturno.Length)
+        {
+            Debug.Log("Vitória! Todas as ondas concluídas.");
+            StartCoroutine(FinalizarJogo());
+            return;
+        }
 
+        int quantidade = inimigosPorturno[ondaAtual];
+        Debug.Log($"Onda {ondaAtual + 1} — {quantidade} inimigos");
         inimigosVivos = quantidade;
         StartCoroutine(SpawnarTurno(quantidade));
     }
@@ -60,13 +57,21 @@ public class VillainSpawner : MonoBehaviour
     {
         if (villainPrefab == null) return;
 
-        Vector3 bottomLeft  = cam.ViewportToWorldPoint(new Vector3(0, 0, 0));
-        Vector3 bottomRight = cam.ViewportToWorldPoint(new Vector3(1, 0, 0));
+        // Spawna nas bordas da câmera, dentro da área visível
+        Vector3 min = cam.ViewportToWorldPoint(new Vector3(0.05f, 0.05f, 0));
+        Vector3 max = cam.ViewportToWorldPoint(new Vector3(0.95f, 0.95f, 0));
 
-        float randomX = Random.Range(bottomLeft.x, bottomRight.x);
-        float spawnY  = bottomLeft.y - spawnOffsetY;
+        Vector3 spawnPos;
+        int borda = Random.Range(0, 4);
+        switch (borda)
+        {
+            case 0: spawnPos = new Vector3(Random.Range(min.x, max.x), min.y + spawnOffsetY, 0); break; // baixo
+            case 1: spawnPos = new Vector3(Random.Range(min.x, max.x), max.y - spawnOffsetY, 0); break; // cima
+            case 2: spawnPos = new Vector3(min.x + spawnOffsetY, Random.Range(min.y, max.y), 0); break; // esquerda
+            default: spawnPos = new Vector3(max.x - spawnOffsetY, Random.Range(min.y, max.y), 0); break; // direita
+        }
 
-        GameObject v = Instantiate(villainPrefab, new Vector3(randomX, spawnY, 0f), Quaternion.identity);
+        GameObject v = Instantiate(villainPrefab, spawnPos, Quaternion.identity);
 
         VillainHealth vh = v.GetComponent<VillainHealth>();
         if (vh != null)
@@ -87,35 +92,14 @@ public class VillainSpawner : MonoBehaviour
 
     IEnumerator FinalizarTurno()
     {
-        yield return new WaitForSeconds(delayAntesDeTrocar);
-
-        turnoAtual++;
-
-        int t = Mathf.Max(1, turnosPorMapa);
-        bool deveTracar = turnoAtual % t == 0;
-
-        if (deveTracar)
-        {
-            GameObject hero = GameObject.FindWithTag("Player");
-            if (hero != null) Destroy(hero);
-
-            int novoMapa = turnoAtual / t;
-
-            if (mapaAtual < mapas.Length)
-                mapas[mapaAtual].SetActive(false);
-
-            if (novoMapa < mapas.Length)
-            {
-                mapas[novoMapa].SetActive(true);
-                mapaAtual = novoMapa;
-            }
-            else
-            {
-                Debug.Log("Fim de jogo!");
-                yield break;
-            }
-        }
-
+        yield return new WaitForSeconds(delayEntreOndas);
+        ondaAtual++;
         IniciarTurno();
+    }
+
+    IEnumerator FinalizarJogo()
+    {
+        yield return new WaitForSeconds(2f);
+        UnityEngine.SceneManagement.SceneManager.LoadScene(cenaVitoria);
     }
 }
