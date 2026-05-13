@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class HeroAnimator : MonoBehaviour
 {
@@ -37,10 +36,16 @@ public class HeroAnimator : MonoBehaviour
     private float attackTimer = 0f;
     private float attackDuration = 0f;
 
+    private Rigidbody2D rb;
+    private VillainHealth cachedNearestVillain;
+    private float villainSearchTimer = 0f;
+    private const float VILLAIN_SEARCH_INTERVAL = 0.1f;
+
     public event System.Action OnImpactFrame;
 
     void Awake()
     {
+        rb = GetComponent<Rigidbody2D>();
         if (attackRenderer != null)
             attackRenderer.enabled = false;
     }
@@ -57,7 +62,37 @@ public class HeroAnimator : MonoBehaviour
         else
             HandleWalkAnimation();
 
-        LookAtNearestVillainIfClose();
+        villainSearchTimer += Time.deltaTime;
+        if (villainSearchTimer >= VILLAIN_SEARCH_INTERVAL)
+        {
+            villainSearchTimer = 0f;
+            RefreshNearestVillain();
+        }
+
+        // Só vira pro vilão quando parado — movimento tem prioridade
+        if (cachedNearestVillain != null && (rb == null || rb.linearVelocity.magnitude < 0.1f))
+        {
+            float dist = Vector2.Distance(transform.position, cachedNearestVillain.transform.position);
+            if (dist < 2f)
+            {
+                Vector2 dir = ((Vector2)cachedNearestVillain.transform.position - (Vector2)transform.position).normalized;
+                lastDirection = dir;
+            }
+        }
+    }
+
+    void RefreshNearestVillain()
+    {
+        VillainHealth nearest = null;
+        float minDist = float.MaxValue;
+
+        foreach (VillainHealth v in VillainHealth.All)
+        {
+            float dist = Vector2.Distance(transform.position, v.transform.position);
+            if (dist < minDist) { minDist = dist; nearest = v; }
+        }
+
+        cachedNearestVillain = nearest;
     }
 
     public void TriggerAttack()
@@ -73,7 +108,11 @@ public class HeroAnimator : MonoBehaviour
             if (bodyRenderer != null)   bodyRenderer.enabled   = false;
             if (headRenderer != null)   headRenderer.enabled   = false;
 
-            LookAtNearestVillain();
+            if (cachedNearestVillain != null)
+            {
+                Vector2 dir = ((Vector2)cachedNearestVillain.transform.position - (Vector2)transform.position).normalized;
+                lastDirection = dir;
+            }
         }
     }
 
@@ -115,11 +154,13 @@ public class HeroAnimator : MonoBehaviour
 
     void HandleWalkAnimation()
     {
-        Vector2 input = GetInput();
+        if (rb == null) return;
 
-        if (input.magnitude > 0.1f)
+        Vector2 vel = rb.linearVelocity;
+
+        if (vel.magnitude > 0.1f)
         {
-            lastDirection = input;
+            lastDirection = vel.normalized;
             frameTimer += Time.deltaTime;
             if (frameTimer >= 1f / walkFrameRate)
             {
@@ -154,58 +195,6 @@ public class HeroAnimator : MonoBehaviour
 
         if (walkHeadFrames != null && frameIndex < walkHeadFrames.Length && headRenderer != null)
             headRenderer.sprite = walkHeadFrames[frameIndex];
-    }
-
-    Vector2 GetInput()
-    {
-        Vector2 input = Vector2.zero;
-        if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)    input.y += 1;
-        if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)  input.y -= 1;
-        if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)  input.x -= 1;
-        if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) input.x += 1;
-        return input.normalized;
-    }
-
-    void LookAtNearestVillainIfClose()
-    {
-        GameObject[] villains = GameObject.FindGameObjectsWithTag("Villain");
-        if (villains.Length == 0) return;
-
-        GameObject nearest = null;
-        float minDist = float.MaxValue;
-
-        foreach (GameObject v in villains)
-        {
-            float dist = Vector2.Distance(transform.position, v.transform.position);
-            if (dist < minDist) { minDist = dist; nearest = v; }
-        }
-
-        if (nearest != null && minDist < 2f)
-        {
-            Vector2 dir = ((Vector2)nearest.transform.position - (Vector2)transform.position).normalized;
-            lastDirection = dir;
-        }
-    }
-
-    void LookAtNearestVillain()
-    {
-        GameObject[] villains = GameObject.FindGameObjectsWithTag("Villain");
-        if (villains.Length == 0) return;
-
-        GameObject nearest = null;
-        float minDist = float.MaxValue;
-
-        foreach (GameObject v in villains)
-        {
-            float dist = Vector2.Distance(transform.position, v.transform.position);
-            if (dist < minDist) { minDist = dist; nearest = v; }
-        }
-
-        if (nearest != null)
-        {
-            Vector2 dir = ((Vector2)nearest.transform.position - (Vector2)transform.position).normalized;
-            lastDirection = dir;
-        }
     }
 
     int GetDirection()

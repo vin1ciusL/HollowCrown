@@ -5,6 +5,8 @@ public class VillainHealth : MonoBehaviour
 {
     public static readonly List<VillainHealth> All = new();
 
+    public event System.Action OnMorte; // <- NOVO
+
     [Header("Vida")]
     public float maxHealth = 10f;
     public float currentHealth = 10f;
@@ -44,6 +46,13 @@ public class VillainHealth : MonoBehaviour
 
     void Update()
     {
+        if (heroHealth == null)
+        {
+            GameObject heroObj = GameObject.FindWithTag("Player");
+            if (heroObj != null)
+                heroHealth = heroObj.GetComponent<HeroHealth>();
+        }
+
         attackTimer += Time.deltaTime;
         if (attackTimer >= attackCooldown)
             TryAttack();
@@ -57,9 +66,16 @@ public class VillainHealth : MonoBehaviour
         if (dist > attackRange) return;
 
         attackTimer = 0f;
-        pendingDamage = true;
 
-        villainAnimator?.TriggerAttack();
+        if (villainAnimator != null)
+        {
+            pendingDamage = true;
+            villainAnimator.TriggerAttack();
+        }
+        else
+        {
+            heroHealth.TakeDamage(attackDamage);
+        }
     }
 
     void ApplyPendingDamage()
@@ -76,6 +92,9 @@ public class VillainHealth : MonoBehaviour
     {
         currentHealth -= damage;
         if (currentHealth <= 0)
+        {
+            OnMorte?.Invoke(); // <- NOVO
             Destroy(gameObject);
+        }
     }
 }

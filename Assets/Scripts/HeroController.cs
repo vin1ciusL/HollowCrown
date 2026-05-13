@@ -49,17 +49,16 @@ public class HeroController : MonoBehaviour
 
     Transform FindClosestEnemyInRange()
     {
-        VillainController[] enemies = FindObjectsByType<VillainController>(FindObjectsSortMode.None);
         Transform closest = null;
         float closestDist = Mathf.Infinity;
 
-        foreach (var enemy in enemies)
+        foreach (var villain in VillainHealth.All)
         {
-            float dist = Vector2.Distance(rb.position, enemy.transform.position);
+            float dist = Vector2.Distance(rb.position, villain.transform.position);
             if (dist <= attackRange && dist < closestDist)
             {
                 closestDist = dist;
-                closest = enemy.transform;
+                closest = villain.transform;
             }
         }
 
