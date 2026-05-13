@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 using System.Collections;
 
 public class VillainSpawner : MonoBehaviour
@@ -22,9 +23,12 @@ public class VillainSpawner : MonoBehaviour
     private int inimigosVivos = 0;
     private bool trocando = false;
 
-    void Start()
+    void OnEnable()
     {
         cam = Camera.main;
+        ondaAtual = 0;
+        inimigosVivos = 0;
+        trocando = false;
         IniciarTurno();
     }
 
@@ -58,19 +62,10 @@ public class VillainSpawner : MonoBehaviour
     {
         if (villainPrefab == null) return;
 
-        // Spawna nas bordas da câmera, dentro da área visível
         Vector3 min = cam.ViewportToWorldPoint(new Vector3(0.05f, 0.05f, 0));
         Vector3 max = cam.ViewportToWorldPoint(new Vector3(0.95f, 0.95f, 0));
 
-        Vector3 spawnPos;
-        int borda = Random.Range(0, 4);
-        switch (borda)
-        {
-            case 0: spawnPos = new Vector3(Random.Range(min.x, max.x), min.y + spawnOffsetY, 0); break; // baixo
-            case 1: spawnPos = new Vector3(Random.Range(min.x, max.x), max.y - spawnOffsetY, 0); break; // cima
-            case 2: spawnPos = new Vector3(min.x + spawnOffsetY, Random.Range(min.y, max.y), 0); break; // esquerda
-            default: spawnPos = new Vector3(max.x - spawnOffsetY, Random.Range(min.y, max.y), 0); break; // direita
-        }
+        Vector3 spawnPos = new Vector3(Random.Range(min.x, max.x), min.y + spawnOffsetY, 0);
 
         GameObject v = Instantiate(villainPrefab, spawnPos, Quaternion.identity);
 
@@ -101,12 +96,24 @@ public class VillainSpawner : MonoBehaviour
     IEnumerator FinalizarJogo()
     {
         GameObject hero = GameObject.FindWithTag("Player");
-        if (hero != null)
-            hero.SetActive(false);
+        hero?.SetActive(false);
 
-        yield return new WaitForSeconds(2f);
+        // Zera o target da câmera para ela não lutar contra o teleporte
+        CameraFollow cf = Camera.main.GetComponent<CameraFollow>();
+        if (cf != null) cf.target = null;
 
-        if (mapaAtual != null)  mapaAtual.SetActive(false);
-        if (proximoMapa != null) proximoMapa.SetActive(true);
+        yield return new WaitForSeconds(delayAntesDeTrocar);
+
+        if (proximoMapa != null)
+        {
+            // Desativa o light do mapa atual antes de ativar o próximo para evitar conflito de Global Light
+            Light2D luz = mapaAtual?.GetComponentInChildren<Light2D>();
+            if (luz != null) luz.enabled = false;
+
+            proximoMapa.SetActive(true);
+        }
+
+        // Desativa o mapa atual POR ÚLTIMO para não matar esta coroutine antes de terminar
+        mapaAtual?.SetActive(false);
     }
 }
