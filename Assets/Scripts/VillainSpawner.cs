@@ -1,55 +1,105 @@
 using UnityEngine;
+using System.Collections;
 
 public class VillainSpawner : MonoBehaviour
 {
     [Header("Spawn")]
     public GameObject villainPrefab;
-    public float spawnInterval = 5f;
-
-    [Header("Offset da tela")]
-    [Tooltip("Quão longe abaixo da tela o vilão spawna")]
     public float spawnOffsetY = 1.5f;
+    public float delayEntreSpawns = 0.3f;
+    public float delayAntesDeTrocar = 2f;
+
+    [Header("Ondas")]
+    public int[] inimigosPorturno = { 2, 3, 4 };
+    public float delayEntreOndas = 3f;
+
+    [Header("Fim de Jogo")]
+    public string cenaVitoria = "menuinicial";
 
     private Camera cam;
-    private float timer;
+    private int ondaAtual = 0;
+    private int inimigosVivos = 0;
+    private bool trocando = false;
 
     void Start()
     {
         cam = Camera.main;
-        timer = spawnInterval; // já spawna no primeiro ciclo
+        IniciarTurno();
     }
 
-    void Update()
+    void IniciarTurno()
     {
-        timer += Time.deltaTime;
+        trocando = false;
 
-        if (timer >= spawnInterval)
+        if (ondaAtual >= inimigosPorturno.Length)
         {
-            timer = 0f;
+            Debug.Log("Vitória! Todas as ondas concluídas.");
+            StartCoroutine(FinalizarJogo());
+            return;
+        }
+
+        int quantidade = inimigosPorturno[ondaAtual];
+        Debug.Log($"Onda {ondaAtual + 1} — {quantidade} inimigos");
+        inimigosVivos = quantidade;
+        StartCoroutine(SpawnarTurno(quantidade));
+    }
+
+    IEnumerator SpawnarTurno(int quantidade)
+    {
+        for (int i = 0; i < quantidade; i++)
+        {
             SpawnVillain();
+            yield return new WaitForSeconds(delayEntreSpawns);
         }
     }
 
     void SpawnVillain()
     {
-        if (villainPrefab == null)
+        if (villainPrefab == null) return;
+
+        // Spawna nas bordas da câmera, dentro da área visível
+        Vector3 min = cam.ViewportToWorldPoint(new Vector3(0.05f, 0.05f, 0));
+        Vector3 max = cam.ViewportToWorldPoint(new Vector3(0.95f, 0.95f, 0));
+
+        Vector3 spawnPos;
+        int borda = Random.Range(0, 4);
+        switch (borda)
         {
-            Debug.LogWarning("VillainSpawner: villainPrefab não atribuído!");
-            return;
+            case 0: spawnPos = new Vector3(Random.Range(min.x, max.x), min.y + spawnOffsetY, 0); break; // baixo
+            case 1: spawnPos = new Vector3(Random.Range(min.x, max.x), max.y - spawnOffsetY, 0); break; // cima
+            case 2: spawnPos = new Vector3(min.x + spawnOffsetY, Random.Range(min.y, max.y), 0); break; // esquerda
+            default: spawnPos = new Vector3(max.x - spawnOffsetY, Random.Range(min.y, max.y), 0); break; // direita
         }
 
-        // Pega os limites da tela em world space
-        Vector3 bottomLeft  = cam.ViewportToWorldPoint(new Vector3(0, 0, 0));
-        Vector3 bottomRight = cam.ViewportToWorldPoint(new Vector3(1, 0, 0));
+        GameObject v = Instantiate(villainPrefab, spawnPos, Quaternion.identity);
 
-        // X aleatório ao longo da borda inferior
-        float randomX = Random.Range(bottomLeft.x, bottomRight.x);
+        VillainHealth vh = v.GetComponent<VillainHealth>();
+        if (vh != null)
+            vh.OnMorte += OnInimigoMorreu;
+    }
 
-        // Y abaixo da tela
-        float spawnY = bottomLeft.y - spawnOffsetY;
+    void OnInimigoMorreu()
+    {
+        if (trocando) return;
 
-        Vector3 spawnPos = new Vector3(randomX, spawnY, 0f);
+        inimigosVivos--;
+        if (inimigosVivos <= 0)
+        {
+            trocando = true;
+            StartCoroutine(FinalizarTurno());
+        }
+    }
 
-        Instantiate(villainPrefab, spawnPos, Quaternion.identity);
+    IEnumerator FinalizarTurno()
+    {
+        yield return new WaitForSeconds(delayEntreOndas);
+        ondaAtual++;
+        IniciarTurno();
+    }
+
+    IEnumerator FinalizarJogo()
+    {
+        yield return new WaitForSeconds(2f);
+        UnityEngine.SceneManagement.SceneManager.LoadScene(cenaVitoria);
     }
 }
