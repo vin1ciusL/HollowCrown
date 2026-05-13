@@ -213,11 +213,10 @@ MonoBehaviour:
   spawnOffsetY: 1.5
   delayEntreSpawns: 0.3
   delayAntesDeTrocar: 2
-  inimigosPorturno: 010000000100000001000000
-  turnosPorMapa: 3
-  mapas:
-  - {fileID: 727507321721823646, guid: cd473ceb7a4252c43833e7993aceea8e, type: 3}
-  - {fileID: 727507321721823646, guid: 20575b9040d70f446b1467d10b5e96fb, type: 3}
+  inimigosPorturno: 020000000300000004000000
+  delayEntreOndas: 3
+  mapaAtual: {fileID: 1801072793}
+  proximoMapa: {fileID: 327010637}
 --- !u!4 &463345966
 Transform:
   m_ObjectHideFlags: 0

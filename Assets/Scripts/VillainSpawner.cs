@@ -13,8 +13,9 @@ public class VillainSpawner : MonoBehaviour
     public int[] inimigosPorturno = { 2, 3, 4 };
     public float delayEntreOndas = 3f;
 
-    [Header("Fim de Jogo")]
-    public string cenaVitoria = "menuinicial";
+    [Header("Próxima Fase")]
+    public GameObject mapaAtual;
+    public GameObject proximoMapa;
 
     private Camera cam;
     private int ondaAtual = 0;
@@ -99,7 +100,13 @@ public class VillainSpawner : MonoBehaviour
 
     IEnumerator FinalizarJogo()
     {
+        GameObject hero = GameObject.FindWithTag("Player");
+        if (hero != null)
+            hero.SetActive(false);
+
         yield return new WaitForSeconds(2f);
-        UnityEngine.SceneManagement.SceneManager.LoadScene(cenaVitoria);
+
+        if (mapaAtual != null)  mapaAtual.SetActive(false);
+        if (proximoMapa != null) proximoMapa.SetActive(true);
     }
 }
