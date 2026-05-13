@@ -44,6 +44,13 @@ public class CardSystem : MonoBehaviour
 
     void TrySpawnHero()
     {
+        // Verifica se há almas suficientes antes de qualquer coisa
+        if (SoulManager.Instance == null || !SoulManager.Instance.PodeInvocar())
+        {
+            Debug.Log("[CardSystem] Almas insuficientes para invocar!");
+            return;
+        }
+
         Vector2 screenPos = Mouse.current.position.ReadValue();
         Vector3 worldPos = mainCamera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, 0));
         worldPos.z = 0f;
@@ -55,6 +62,10 @@ public class CardSystem : MonoBehaviour
             Debug.Log("Local bloqueado por: " + hit.gameObject.name);
             return; // Não spawna
         }
+
+        // Gasta as almas (double-check interno)
+        if (!SoulManager.Instance.TentarGastarParaInvocacao())
+            return;
 
         if (heroInstance != null)
             Destroy(heroInstance);

@@ -88,12 +88,20 @@ public class VillainHealth : MonoBehaviour
             heroHealth.TakeDamage(attackDamage);
     }
 
+    [Header("Recompensa")]
+    [Tooltip("Almas concedidas ao jogador ao matar este inimigo")]
+    public int almasRecompensa = 10;
+
     public void TakeDamage(float damage)
     {
         currentHealth -= damage;
         if (currentHealth <= 0)
         {
-            OnMorte?.Invoke(); // <- NOVO
+            // Concede almas ao jogador
+            if (SoulManager.Instance != null)
+                SoulManager.Instance.AdicionarAlmas(almasRecompensa);
+
+            OnMorte?.Invoke();
             Destroy(gameObject);
         }
     }
