@@ -26,9 +26,11 @@ public class VillainSpawner : MonoBehaviour
     void OnEnable()
     {
         cam = Camera.main;
-        ondaAtual = 0;
-        inimigosVivos = 0;
-        trocando = false;
+
+        // Reseta almas para o valor inicial da fase
+        if (SoulManager.Instance != null)
+            SoulManager.Instance.ResetarParaFase();
+
         IniciarTurno();
     }
 

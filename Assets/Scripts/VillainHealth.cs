@@ -20,6 +20,7 @@ public class VillainHealth : MonoBehaviour
     private bool pendingDamage = false;
     private VillainAnimator villainAnimator;
     private HeroHealth heroHealth;
+    private LichHealth lichAlvo;
 
     void OnEnable()  => All.Add(this);
     void OnDisable() => All.Remove(this);
@@ -53,17 +54,28 @@ public class VillainHealth : MonoBehaviour
                 heroHealth = heroObj.GetComponent<HeroHealth>();
         }
 
+        lichAlvo = LichHealth.Instance;
+
         attackTimer += Time.deltaTime;
         if (attackTimer >= attackCooldown)
             TryAttack();
     }
 
+    // Retorna o alvo mais próximo dentro do attackRange
+    MonoBehaviour AlvoMaisProximo()
+    {
+        float distHero = heroHealth != null ? Vector2.Distance(transform.position, heroHealth.transform.position) : float.MaxValue;
+        float distLich = lichAlvo != null ? Vector2.Distance(transform.position, lichAlvo.transform.position) : float.MaxValue;
+
+        if (distHero <= attackRange && distHero <= distLich) return heroHealth;
+        if (distLich <= attackRange) return lichAlvo;
+        return null;
+    }
+
     void TryAttack()
     {
-        if (heroHealth == null) return;
-
-        float dist = Vector2.Distance(transform.position, heroHealth.transform.position);
-        if (dist > attackRange) return;
+        MonoBehaviour alvo = AlvoMaisProximo();
+        if (alvo == null) return;
 
         attackTimer = 0f;
 
@@ -74,26 +86,39 @@ public class VillainHealth : MonoBehaviour
         }
         else
         {
-            heroHealth.TakeDamage(attackDamage);
+            AplicarDano(alvo);
         }
+    }
+
+    void AplicarDano(MonoBehaviour alvo)
+    {
+        if (alvo is HeroHealth h) h.TakeDamage(attackDamage);
+        else if (alvo is LichHealth l) l.TakeDamage(attackDamage);
     }
 
     void ApplyPendingDamage()
     {
-        if (!pendingDamage || heroHealth == null) return;
+        if (!pendingDamage) return;
         pendingDamage = false;
 
-        float dist = Vector2.Distance(transform.position, heroHealth.transform.position);
-        if (dist <= attackRange * 1.2f)
-            heroHealth.TakeDamage(attackDamage);
+        MonoBehaviour alvo = AlvoMaisProximo();
+        if (alvo != null) AplicarDano(alvo);
     }
+
+    [Header("Recompensa")]
+    [Tooltip("Almas concedidas ao jogador ao matar este inimigo")]
+    public int almasRecompensa = 10;
 
     public void TakeDamage(float damage)
     {
         currentHealth -= damage;
         if (currentHealth <= 0)
         {
-            OnMorte?.Invoke(); // <- NOVO
+            // Concede almas ao jogador
+            if (SoulManager.Instance != null)
+                SoulManager.Instance.AdicionarAlmas(almasRecompensa);
+
+            OnMorte?.Invoke();
             Destroy(gameObject);
         }
     }

@@ -45,24 +45,45 @@ public class VillainController : MonoBehaviour
         }
     }
 
+    Transform AlvoMaisProximo()
+    {
+        Transform alvo = null;
+        float menorDist = float.MaxValue;
+
+        if (hero != null)
+        {
+            menorDist = Vector2.Distance(rb.position, hero.position);
+            alvo = hero;
+        }
+
+        LichHealth lich = LichHealth.Instance;
+        if (lich != null)
+        {
+            float d = Vector2.Distance(rb.position, lich.transform.position);
+            if (d < menorDist)
+                alvo = lich.transform;
+        }
+
+        return alvo;
+    }
+
     void Update()
     {
-        // Tenta encontrar o herói se ainda não achou (ex: herói spawnado depois)
         if (!heroFound)
-        {
             BuscarHeroi();
-        }
     }
 
     void FixedUpdate()
     {
-        if (!heroFound || hero == null)
+        Transform alvo = AlvoMaisProximo();
+
+        if (alvo == null)
         {
             rb.linearVelocity = Vector2.zero;
             return;
         }
 
-        float distancia = Vector2.Distance(rb.position, hero.position);
+        float distancia = Vector2.Distance(rb.position, alvo.position);
 
         if (distancia > detectionRange)
         {
@@ -76,7 +97,7 @@ public class VillainController : MonoBehaviour
             return;
         }
 
-        Vector2 direcaoIdeal = ((Vector2)hero.position - rb.position).normalized;
+        Vector2 direcaoIdeal = ((Vector2)alvo.position - rb.position).normalized;
         Vector2 direcaoFinal = GetDirecaoDesviando(direcaoIdeal);
         rb.linearVelocity = direcaoFinal * moveSpeed;
     }

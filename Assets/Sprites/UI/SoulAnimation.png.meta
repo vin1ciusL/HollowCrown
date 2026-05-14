@@ -1,0 +1,419 @@
+fileFormatVersion: 2
+guid: 8ed447b2b7ed1db40a3f5e54867f23cf
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5761083694230420656
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_0
+  - first:
+      213: 6036494634104728913
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_1
+  - first:
+      213: -2804301646225047083
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_2
+  - first:
+      213: -1326445737115600372
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_3
+  - first:
+      213: 25576705382710815
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_4
+  - first:
+      213: 946514954401659748
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_5
+  - first:
+      213: 9058888544794112518
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_6
+  - first:
+      213: -2592877911682916649
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_7
+  - first:
+      213: -2235231198930844510
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_8
+  - first:
+      213: -2456194338202801440
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_9
+  - first:
+      213: -7335211053338100636
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_10
+  - first:
+      213: -7319937081300286811
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_11
+  - first:
+      213: 7900794124483101298
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_12
+  - first:
+      213: -7873560918658902013
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_13
+  - first:
+      213: 7647530431113093828
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_14
+  - first:
+      213: 1457152391013042273
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_15
+  - first:
+      213: -7333331430357543172
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_16
+  - first:
+      213: 6257108915534491747
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_17
+  - first:
+      213: -5518148951306129536
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_18
+  - first:
+      213: 6493888149083161223
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_19
+  - first:
+      213: -3187164297854083578
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_20
+  - first:
+      213: -7112223788423362970
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_21
+  - first:
+      213: -3277139000633887624
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_22
+  - first:
+      213: 4223609154928670242
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_23
+  - first:
+      213: -7858747248338986567
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_24
+  - first:
+      213: -1541679831393280531
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_25
+  - first:
+      213: 2953143800718252893
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_26
+  - first:
+      213: -6394119039264413104
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_27
+  - first:
+      213: -8192430862215677425
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_28
+  - first:
+      213: 8681290626377191949
+    second: ChatGPT Image 13 de mai. de 2026, 17_28_36 (1)_29
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: SoulAnimation_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 296
+        width: 270
+        height: 296
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e34a3d679cd1d4e4bbcb468f64f1b326
+      internalID: 1008843646
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SoulAnimation_1
+      rect:
+        serializedVersion: 2
+        x: 270
+        y: 296
+        width: 270
+        height: 296
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9dc0bd9a68be55b439e8ae38a6d819e1
+      internalID: 2071027918
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SoulAnimation_2
+      rect:
+        serializedVersion: 2
+        x: 540
+        y: 296
+        width: 270
+        height: 296
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 06776cb13efcfe84fbf58adf8ab6c1fe
+      internalID: 1957207952
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SoulAnimation_3
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 296
+        width: 270
+        height: 296
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 786f5008fd4f7e44f8f8ec8d42e039e9
+      internalID: -1463893669
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SoulAnimation_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 270
+        height: 296
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 940f165c3a62d264587fbaf661aad7df
+      internalID: -1239029815
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SoulAnimation_5
+      rect:
+        serializedVersion: 2
+        x: 270
+        y: 0
+        width: 270
+        height: 296
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 28c50bc8c22beb243b025854d887fac7
+      internalID: -244477148
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SoulAnimation_6
+      rect:
+        serializedVersion: 2
+        x: 540
+        y: 0
+        width: 270
+        height: 296
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cf7058c51a847e74b91135a5620ade0b
+      internalID: 1949001036
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SoulAnimation_7
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 0
+        width: 270
+        height: 296
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cba2c63173fbb5e4aa8f3d1073df3e78
+      internalID: -1348284442
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: dee0d45be02ef4346ac21a10bb488f01
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":4.0,"y":2.0},"gridSpriteSize":{"x":270.0,"y":296.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
+    nameFileIdTable:
+      SoulAnimation_0: 1008843646
+      SoulAnimation_1: 2071027918
+      SoulAnimation_2: 1957207952
+      SoulAnimation_3: -1463893669
+      SoulAnimation_4: -1239029815
+      SoulAnimation_5: -244477148
+      SoulAnimation_6: 1949001036
+      SoulAnimation_7: -1348284442
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
