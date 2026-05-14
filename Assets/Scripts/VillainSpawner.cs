@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 using System.Collections;
 
 public class VillainSpawner : MonoBehaviour
@@ -17,6 +16,7 @@ public class VillainSpawner : MonoBehaviour
     [Header("Próxima Fase")]
     public GameObject mapaAtual;
     public GameObject proximoMapa;
+    public Vector2 posicaoCameraProximoMapa;
 
     private Camera cam;
     private int ondaAtual = 0;
@@ -95,25 +95,20 @@ public class VillainSpawner : MonoBehaviour
 
     IEnumerator FinalizarJogo()
     {
-        GameObject hero = GameObject.FindWithTag("Player");
-        hero?.SetActive(false);
-
-        // Zera o target da câmera para ela não lutar contra o teleporte
-        CameraFollow cf = Camera.main.GetComponent<CameraFollow>();
-        if (cf != null) cf.target = null;
+        foreach (GameObject hero in GameObject.FindGameObjectsWithTag("Player"))
+            hero.SetActive(false);
 
         yield return new WaitForSeconds(delayAntesDeTrocar);
 
+        if (mapaAtual != null) mapaAtual.SetActive(false);
         if (proximoMapa != null)
         {
-            // Desativa o light do mapa atual antes de ativar o próximo para evitar conflito de Global Light
-            Light2D luz = mapaAtual?.GetComponentInChildren<Light2D>();
-            if (luz != null) luz.enabled = false;
-
             proximoMapa.SetActive(true);
+            Camera.main.transform.position = new Vector3(
+                posicaoCameraProximoMapa.x,
+                posicaoCameraProximoMapa.y,
+                -10f
+            );
         }
-
-        // Desativa o mapa atual POR ÚLTIMO para não matar esta coroutine antes de terminar
-        mapaAtual?.SetActive(false);
     }
 }
