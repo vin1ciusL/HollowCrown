@@ -16,10 +16,25 @@ public class LichAttack : MonoBehaviour
     public float moveSpeed = 1.5f;
     public float followDistance = 3f;
 
+    [Header("Anti-Softlock")]
+    public float stuckTimeThreshold = 1.5f;
+    public float stuckSpeedThreshold = 0.15f;
+    public float unstuckForce = 3f;
+
+    [Header("Layers de Obstáculo")]
+    [Tooltip("Quais layers são consideradas obstáculo para desvio (ex: Obstaculos)")]
+    public LayerMask obstacleLayer = ~0;
+
     private float fireTimer = 0f;
     private Transform player;
     private Rigidbody2D rb;
     private LichAnimator lichAnimator;
+
+    // Anti-softlock
+    private float stuckTimer = 0f;
+    private Vector2 lastPosition;
+    private float unstuckCooldown = 0f;
+    private Vector2 escapeDirection;
 
     void Start()
     {
@@ -30,6 +45,8 @@ public class LichAttack : MonoBehaviour
 
         GameObject hero = GameObject.FindWithTag("Player");
         if (hero != null) player = hero.transform;
+
+        lastPosition = rb.position;
     }
 
     void Update()
@@ -52,11 +69,21 @@ public class LichAttack : MonoBehaviour
             fireTimer = 0f;
             Atirar(alvo.transform);
         }
+
+        DetectarSoftlock();
     }
 
     void FixedUpdate()
     {
         if (player == null || rb == null) return;
+
+        // Se está em modo de escape (anti-softlock), usa o impulso
+        if (unstuckCooldown > 0f)
+        {
+            unstuckCooldown -= Time.fixedDeltaTime;
+            rb.MovePosition(rb.position + escapeDirection * unstuckForce * Time.fixedDeltaTime);
+            return;
+        }
 
         float dist = Vector2.Distance(rb.position, player.position);
         if (dist > followDistance)
@@ -64,6 +91,61 @@ public class LichAttack : MonoBehaviour
             Vector2 newPos = Vector2.MoveTowards(rb.position, player.position, moveSpeed * Time.fixedDeltaTime);
             rb.MovePosition(newPos);
         }
+    }
+
+    // ─── Anti-Softlock ──────────────────────────────────────────
+
+    void DetectarSoftlock()
+    {
+        if (unstuckCooldown > 0f) return;
+        if (player == null) { stuckTimer = 0f; return; }
+
+        float distToPlayer = Vector2.Distance(rb.position, player.position);
+        if (distToPlayer <= followDistance)
+        {
+            stuckTimer = 0f;
+            lastPosition = rb.position;
+            return;
+        }
+
+        float deslocamento = Vector2.Distance(rb.position, lastPosition);
+        if (deslocamento < stuckSpeedThreshold * Time.deltaTime)
+        {
+            stuckTimer += Time.deltaTime;
+            if (stuckTimer >= stuckTimeThreshold)
+            {
+                // Tenta escapar perpendicular
+                Vector2 dirAlvo = ((Vector2)player.position - rb.position).normalized;
+                float lado = Random.value > 0.5f ? 90f : -90f;
+                float rad = (lado + Random.Range(-30f, 30f)) * Mathf.Deg2Rad;
+                escapeDirection = new Vector2(
+                    Mathf.Cos(rad) * dirAlvo.x - Mathf.Sin(rad) * dirAlvo.y,
+                    Mathf.Sin(rad) * dirAlvo.x + Mathf.Cos(rad) * dirAlvo.y
+                );
+
+                // Verifica se a direção está obstruída
+                RaycastHit2D hitCheck = Physics2D.Raycast(rb.position, escapeDirection, 2f, obstacleLayer);
+                if (hitCheck.collider != null && hitCheck.collider.gameObject != gameObject)
+                {
+                    // Tenta o outro lado
+                    rad = (-lado + Random.Range(-30f, 30f)) * Mathf.Deg2Rad;
+                    escapeDirection = new Vector2(
+                        Mathf.Cos(rad) * dirAlvo.x - Mathf.Sin(rad) * dirAlvo.y,
+                        Mathf.Sin(rad) * dirAlvo.x + Mathf.Cos(rad) * dirAlvo.y
+                    );
+                }
+
+                unstuckCooldown = 0.4f;
+                stuckTimer = 0f;
+                Debug.Log($"[LichAttack] Anti-softlock ativado");
+            }
+        }
+        else
+        {
+            stuckTimer = 0f;
+        }
+
+        lastPosition = rb.position;
     }
 
     void Atirar(Transform alvo)

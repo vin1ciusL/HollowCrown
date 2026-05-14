@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7297200844313788666}
   - component: {fileID: 6349166903700084687}
   - component: {fileID: 1864122791509648604}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Lich
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -165,6 +165,12 @@ MonoBehaviour:
   damage: 20
   moveSpeed: 1.5
   followDistance: 3
+  stuckTimeThreshold: 1.5
+  stuckSpeedThreshold: 0.15
+  unstuckForce: 3
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!114 &1864122791509648604
 MonoBehaviour:
   m_ObjectHideFlags: 0
