@@ -47,7 +47,8 @@ public class LichCardSystem : MonoBehaviour
         }
 
         Vector2 screenPos = Mouse.current.position.ReadValue();
-        Vector3 worldPos = mainCamera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, 0));
+        float camZ = Mathf.Abs(mainCamera.transform.position.z);
+        Vector3 worldPos = mainCamera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, camZ));
         worldPos.z = 0f;
 
         if (lichInstance != null)

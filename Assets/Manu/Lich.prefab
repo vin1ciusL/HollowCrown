@@ -31,7 +31,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -19.03586, y: -15.28425, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2, y: 2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -83,7 +83,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 5
   m_MaskInteraction: 0
   m_Sprite: {fileID: -7056280054675512610, guid: 043f29277a758e140a5b2f55a396557a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -134,8 +134,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33219fd0275475a44827065a94a75f01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LichAnimator
-  idleFrames: []
-  attackFrames: []
+  idleFrames:
+  - {fileID: -7056280054675512610, guid: 043f29277a758e140a5b2f55a396557a, type: 3}
+  - {fileID: 6896926506888504548, guid: 043f29277a758e140a5b2f55a396557a, type: 3}
+  - {fileID: -6554318319508227413, guid: 043f29277a758e140a5b2f55a396557a, type: 3}
+  - {fileID: -6140641024301380761, guid: 043f29277a758e140a5b2f55a396557a, type: 3}
+  attackFrames:
+  - {fileID: 7303943575640455154, guid: 043f29277a758e140a5b2f55a396557a, type: 3}
+  - {fileID: -1897456350894318205, guid: 043f29277a758e140a5b2f55a396557a, type: 3}
+  - {fileID: 2579604404519095114, guid: 043f29277a758e140a5b2f55a396557a, type: 3}
+  - {fileID: -3182541696478502586, guid: 043f29277a758e140a5b2f55a396557a, type: 3}
   idleFrameRate: 8
   attackFrameRate: 12
 --- !u!114 &6349166903700084687

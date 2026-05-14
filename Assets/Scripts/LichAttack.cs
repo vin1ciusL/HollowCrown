@@ -38,7 +38,6 @@ public class LichAttack : MonoBehaviour
         {
             GameObject hero = GameObject.FindWithTag("Player");
             if (hero != null) player = hero.transform;
-            return;
         }
 
         VillainHealth alvo = EncontrarVilaoMaisProximo();
@@ -69,14 +68,22 @@ public class LichAttack : MonoBehaviour
 
     void Atirar(Transform alvo)
     {
-        if (projectilePrefab == null || firePoint == null) return;
-
         if (lichAnimator != null) lichAnimator.TriggerAttack();
 
-        Vector2 dir = ((Vector2)alvo.position - (Vector2)firePoint.position).normalized;
-        GameObject proj = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
-        LichProjectile lp = proj.GetComponent<LichProjectile>();
-        if (lp != null) lp.Initialize(dir, damage);
+        // Com projétil
+        if (projectilePrefab != null && firePoint != null)
+        {
+            Vector2 dir = ((Vector2)alvo.position - (Vector2)firePoint.position).normalized;
+            GameObject proj = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
+            LichProjectile lp = proj.GetComponent<LichProjectile>();
+            if (lp != null) lp.Initialize(dir, damage);
+            return;
+        }
+
+        // Sem projétil: dano direto se estiver perto
+        VillainHealth vh = alvo.GetComponent<VillainHealth>();
+        if (vh != null)
+            vh.TakeDamage(damage);
     }
 
     VillainHealth EncontrarVilaoMaisProximo()
