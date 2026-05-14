@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 213b2986929782844a7ba9bb5c8ede97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SoulManager
-  almasIniciais: 50
-  regeneracaoPorSegundo: 10
+  almasIniciais: 10
+  regeneracaoPorSegundo: 5
   custoInvocacao: 50
   _almasAtuais: 0
