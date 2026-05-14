@@ -3,10 +3,10 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
-public class CardSystem : MonoBehaviour
+public class LichCardSystem : MonoBehaviour
 {
-    [Header("Referências")]
-    public GameObject heroPrefab;
+    [Header("Referencias")]
+    public GameObject lichPrefab;
     public Image cardImage;
     public Camera mainCamera;
 
@@ -15,11 +15,10 @@ public class CardSystem : MonoBehaviour
     public Color colorSelected = Color.red;
 
     [Header("Spawn")]
-    [Tooltip("Raio para checar se o local está livre de colisores")]
     public float spawnCheckRadius = 0.5f;
 
     private bool cardSelected = false;
-    private GameObject heroInstance = null;
+    private GameObject lichInstance = null;
 
     void Update()
     {
@@ -29,25 +28,21 @@ public class CardSystem : MonoBehaviour
                 return;
 
             if (cardSelected)
-                TrySpawnHero();
+                TrySpawnLich();
         }
     }
 
     public void OnCardClicked()
     {
-        if (heroInstance != null && heroInstance.activeInHierarchy)
-            return;
-
         cardSelected = !cardSelected;
         cardImage.color = cardSelected ? colorSelected : colorDefault;
     }
 
-    void TrySpawnHero()
+    void TrySpawnLich()
     {
-        // Verifica se há almas suficientes antes de qualquer coisa
-        if (SoulManager.Instance == null || !SoulManager.Instance.PodeInvocar())
+        if (lichPrefab == null)
         {
-            Debug.Log("[CardSystem] Almas insuficientes para invocar!");
+            Debug.LogError("[LichCardSystem] lichPrefab nao atribuido!");
             return;
         }
 
@@ -56,22 +51,11 @@ public class CardSystem : MonoBehaviour
         Vector3 worldPos = mainCamera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, camZ));
         worldPos.z = 0f;
 
-        // Checa se tem algum colisor no local
-        Collider2D hit = Physics2D.OverlapCircle(worldPos, spawnCheckRadius);
-        if (hit != null)
-        {
-            Debug.Log("Local bloqueado por: " + hit.gameObject.name);
-            return; // Não spawna
-        }
+        if (lichInstance != null)
+            Destroy(lichInstance);
 
-        // Gasta as almas (double-check interno)
-        if (!SoulManager.Instance.TentarGastarParaInvocacao())
-            return;
-
-        if (heroInstance != null)
-            Destroy(heroInstance);
-
-        heroInstance = Instantiate(heroPrefab, worldPos, Quaternion.identity);
+        lichInstance = Instantiate(lichPrefab, worldPos, Quaternion.identity);
+        Debug.Log("[LichCardSystem] Lich invocado em " + worldPos);
 
         cardSelected = false;
         cardImage.color = colorDefault;
