@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 301234622605455883}
   - component: {fileID: 2509020614154466740}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Attack
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -101,7 +101,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4054976940071537623}
   - component: {fileID: 728346564643023534}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -192,7 +192,7 @@ GameObject:
   m_Component:
   - component: {fileID: 920415046949654278}
   - component: {fileID: 1494017298554535667}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -288,7 +288,7 @@ GameObject:
   - component: {fileID: -5870165535001351085}
   - component: {fileID: 8379933530301869058}
   - component: {fileID: 6016792671023139838}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Hero
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -356,6 +356,12 @@ MonoBehaviour:
   attackRange: 6
   stopDistance: 0.8
   showGizmos: 1
+  stuckTimeThreshold: 1.2
+  stuckSpeedThreshold: 0.15
+  unstuckForce: 5
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!114 &8100994188236259051
 MonoBehaviour:
   m_ObjectHideFlags: 0

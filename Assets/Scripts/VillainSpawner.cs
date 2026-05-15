@@ -25,6 +25,16 @@ public class VillainSpawner : MonoBehaviour
     public GameObject proximoMapa;
     public Vector2 posicaoCameraProximoMapa;
 
+    [Header("Spawn Seguro")]
+    [Tooltip("Margem interna do viewport para não spawnar nas bordas")]
+    public float viewportMargin = 0.10f;
+    [Tooltip("Raio para checar se o ponto de spawn está livre de obstáculos")]
+    public float spawnCheckRadius = 0.5f;
+    [Tooltip("Máximo de tentativas para encontrar posição válida")]
+    public int maxSpawnAttempts = 15;
+    [Tooltip("Collider2D do mapa — se atribuído, spawn só dentro dele")]
+    public Collider2D mapBounds;
+
     private Camera cam;
     private int ondaAtual = 0;
     private int inimigosVivos = 0;
@@ -71,32 +81,62 @@ public class VillainSpawner : MonoBehaviour
     {
         if (villainPrefab == null) return;
 
-        Vector2 min, max;
-
-        // Se limites do mapa foram definidos no Inspector, usa eles
-        if (mapMin != mapMax)
+        Vector3 spawnPos = EncontrarPosicaoSegura();
+        if (spawnPos == Vector3.zero)
         {
-            min = mapMin + Vector2.one * spawnMargin;
-            max = mapMax - Vector2.one * spawnMargin;
+            Debug.LogWarning("[VillainSpawner] Não foi possível encontrar posição segura para spawn!");
+            spawnPos = cam.transform.position;
+            spawnPos.z = 0f;
         }
-        else
-        {
-            // Fallback: usa viewport da câmera atual
-            Vector3 vmin = cam.ViewportToWorldPoint(new Vector3(0.05f, 0.05f, 0));
-            Vector3 vmax = cam.ViewportToWorldPoint(new Vector3(0.95f, 0.95f, 0));
-            min = vmin;
-            max = vmax;
-        }
-
-        float x = Random.Range(min.x, max.x);
-        float y = Mathf.Clamp(min.y + spawnOffsetY, min.y, max.y);
-        Vector3 spawnPos = new Vector3(x, y, 0);
 
         GameObject v = Instantiate(villainPrefab, spawnPos, Quaternion.identity);
 
         VillainHealth vh = v.GetComponent<VillainHealth>();
         if (vh != null)
             vh.OnMorte += OnInimigoMorreu;
+    }
+
+    /// <summary>
+    /// Tenta encontrar uma posição de spawn que esteja:
+    /// 1) Dentro dos limites do viewport da câmera (com margem)
+    /// 2) Dentro do Collider do mapa (se atribuído)
+    /// 3) Livre de obstáculos físicos
+    /// </summary>
+    Vector3 EncontrarPosicaoSegura()
+    {
+        bool useMapBounds = mapMin != mapMax;
+        Vector2 boundsMin = useMapBounds ? mapMin + Vector2.one * spawnMargin : Vector2.zero;
+        Vector2 boundsMax = useMapBounds ? mapMax - Vector2.one * spawnMargin : Vector2.zero;
+
+        for (int tentativa = 0; tentativa < maxSpawnAttempts; tentativa++)
+        {
+            Vector3 worldPos;
+            if (useMapBounds)
+            {
+                worldPos = new Vector3(
+                    Random.Range(boundsMin.x, boundsMax.x),
+                    Random.Range(boundsMin.y, boundsMax.y),
+                    0f);
+            }
+            else
+            {
+                float vx = Random.Range(viewportMargin, 1f - viewportMargin);
+                float vy = Random.Range(viewportMargin, 1f - viewportMargin);
+                worldPos = cam.ViewportToWorldPoint(new Vector3(vx, vy, 0));
+                worldPos.z = 0f;
+            }
+
+            if (mapBounds != null && !mapBounds.OverlapPoint(worldPos))
+                continue;
+
+            Collider2D obstruction = Physics2D.OverlapCircle(worldPos, spawnCheckRadius);
+            if (obstruction != null && !obstruction.isTrigger)
+                continue;
+
+            return worldPos;
+        }
+
+        return Vector3.zero;
     }
 
     void OnInimigoMorreu()
@@ -115,7 +155,29 @@ public class VillainSpawner : MonoBehaviour
     {
         yield return new WaitForSeconds(delayEntreOndas);
         ondaAtual++;
-        IniciarTurno();
+
+        // Se ainda há ondas restantes, mostra a tela de buff
+        if (ondaAtual < inimigosPorturno.Length)
+        {
+            if (WaveBuffUI.Instance != null)
+            {
+                // Mostra UI de buff e espera o jogador escolher
+                WaveBuffUI.Instance.MostrarEscolha(() =>
+                {
+                    // Callback: após o jogador escolher, inicia o próximo turno
+                    IniciarTurno();
+                });
+            }
+            else
+            {
+                // Sem sistema de buff configurado — prossegue normalmente
+                IniciarTurno();
+            }
+        }
+        else
+        {
+            IniciarTurno(); // vai chamar FinalizarJogo()
+        }
     }
 
     IEnumerator FinalizarJogo()

@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6875289392878969432}
   - component: {fileID: 5952085356676354528}
   - component: {fileID: 4430496219067375619}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Golem
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -164,6 +164,12 @@ MonoBehaviour:
   attackRange: 6
   stopDistance: 1.2
   showGizmos: 1
+  stuckTimeThreshold: 1.2
+  stuckSpeedThreshold: 0.15
+  unstuckForce: 4
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!114 &4430496219067375619
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -191,7 +197,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7980803558025531946}
   - component: {fileID: 3111738422929283533}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,6 +12,18 @@ public class VillainController : MonoBehaviour
     [Tooltip("Distância mínima para parar perto do herói")]
     public float stopDistance = 0.8f;
 
+    [Header("Anti-Softlock")]
+    [Tooltip("Tempo parado antes de considerar como preso")]
+    public float stuckTimeThreshold = 1.5f;
+    [Tooltip("Velocidade mínima para não ser considerado parado")]
+    public float stuckSpeedThreshold = 0.15f;
+    [Tooltip("Força do impulso de escape")]
+    public float unstuckForce = 4f;
+
+    [Header("Layers de Obstáculo")]
+    [Tooltip("Quais layers são consideradas obstáculo para desvio (ex: Obstaculos)")]
+    public LayerMask obstacleLayer = ~0;
+
     [Header("Debug")]
     public bool showGizmos = true;
 
@@ -21,6 +33,12 @@ public class VillainController : MonoBehaviour
     private Transform mage;
     private float retargetTimer = 0f;
     private const float retargetInterval = 0.5f;
+
+    // Anti-softlock
+    private float stuckTimer = 0f;
+    private Vector2 lastPosition;
+    private float unstuckCooldown = 0f;
+    private Vector2 escapeDirection;
 
     void Awake()
     {
@@ -32,6 +50,7 @@ public class VillainController : MonoBehaviour
     void Start()
     {
         BuscarAlvos();
+        lastPosition = rb.position;
     }
 
     void BuscarAlvos()
@@ -90,10 +109,20 @@ public class VillainController : MonoBehaviour
             retargetTimer = 0f;
             BuscarAlvos();
         }
+
+        DetectarSoftlock();
     }
 
     void FixedUpdate()
     {
+        // Se está em modo de escape (anti-softlock), usa o impulso
+        if (unstuckCooldown > 0f)
+        {
+            unstuckCooldown -= Time.fixedDeltaTime;
+            rb.linearVelocity = escapeDirection * unstuckForce;
+            return;
+        }
+
         Transform alvo = AlvoMaisProximo();
 
         if (alvo == null)
@@ -121,6 +150,70 @@ public class VillainController : MonoBehaviour
         rb.linearVelocity = direcaoFinal * moveSpeed;
     }
 
+    // ─── Sistema Anti-Softlock ──────────────────────────────────
+
+    void DetectarSoftlock()
+    {
+        if (unstuckCooldown > 0f) return; // já está escapando
+
+        Transform alvo = AlvoMaisProximo();
+        if (alvo == null) { stuckTimer = 0f; return; }
+
+        float distancia = Vector2.Distance(rb.position, alvo.position);
+
+        // Só detecta softlock quando deveria estar se movendo
+        if (distancia <= stopDistance || distancia > detectionRange)
+        {
+            stuckTimer = 0f;
+            return;
+        }
+
+        // Verifica se está efetivamente parado
+        float deslocamento = Vector2.Distance(rb.position, lastPosition);
+        if (deslocamento < stuckSpeedThreshold * Time.deltaTime)
+        {
+            stuckTimer += Time.deltaTime;
+
+            if (stuckTimer >= stuckTimeThreshold)
+            {
+                AplicarEscape();
+                stuckTimer = 0f;
+            }
+        }
+        else
+        {
+            stuckTimer = 0f;
+        }
+
+        lastPosition = rb.position;
+    }
+
+    void AplicarEscape()
+    {
+        // Tenta direções perpendiculares ao alvo, com aleatoriedade
+        Transform alvo = AlvoMaisProximo();
+        if (alvo == null) return;
+
+        Vector2 dirAlvo = ((Vector2)alvo.position - rb.position).normalized;
+
+        // Tenta perpendicular (esquerda/direita aleatória) + componente para trás
+        float lado = Random.value > 0.5f ? 90f : -90f;
+        escapeDirection = Rotacionar(dirAlvo, lado + Random.Range(-30f, 30f));
+
+        // Verifica se a direção de escape está obstruída
+        if (EstaObstruido(escapeDirection, 2f))
+        {
+            escapeDirection = Rotacionar(dirAlvo, -lado + Random.Range(-30f, 30f));
+            if (EstaObstruido(escapeDirection, 2f))
+                escapeDirection = -dirAlvo; // Fallback: recuar
+        }
+
+        unstuckCooldown = 0.5f;
+        Debug.Log($"[VillainController] Anti-softlock ativado em {gameObject.name}");
+    }
+
+    // ─── Pathfinding com desvio ─────────────────────────────────
+
     Vector2 GetDirecaoDesviando(Vector2 direcaoIdeal)
     {
         // Caminho direto está livre?
@@ -144,12 +237,11 @@ public class VillainController : MonoBehaviour
 
     bool EstaObstruido(Vector2 direcao, float distancia)
     {
-        RaycastHit2D[] hits = Physics2D.RaycastAll(rb.position, direcao, distancia);
+        RaycastHit2D[] hits = Physics2D.RaycastAll(rb.position, direcao, distancia, obstacleLayer);
         foreach (var hit in hits)
         {
             if (hit.collider.gameObject == gameObject) continue;
             if (hit.collider.isTrigger) continue;
-            // Ignora qualquer entidade viva (não bloqueia path)
             GameObject go = hit.collider.gameObject;
             if (go.GetComponentInParent<HeroHealth>() != null) continue;
             if (go.GetComponentInParent<GolemHealth>() != null) continue;
