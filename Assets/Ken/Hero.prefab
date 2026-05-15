@@ -388,7 +388,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HeroHealth
   maxHealth: 100
   currentHealth: 100
-  attackDamage: 100
+  attackDamage: 10
   attackRange: 1
   attackCooldown: 1
 --- !u!61 &8379933530301869058

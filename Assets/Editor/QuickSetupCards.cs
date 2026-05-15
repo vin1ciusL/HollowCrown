@@ -41,15 +41,24 @@ public static class QuickSetupCards
         }
         if (lcs != null)
         {
+            lcs.enabled = true;
             lcs.lichPrefab = lichPrefab;
             lcs.mainCamera = mainCam;
             EditorUtility.SetDirty(lcs);
         }
+        // Mago agora é VILÃO, não invocação. Desabilita MageCardSystem se existir.
         if (mcs != null)
         {
-            mcs.magePrefab = magoPrefab;
-            mcs.mainCamera = mainCam;
+            mcs.enabled = false;
             EditorUtility.SetDirty(mcs);
+        }
+
+        // Remove MageCard antigo da UI se ainda existir
+        GameObject oldMageCard = GameObject.Find("MageCard");
+        if (oldMageCard != null)
+        {
+            Undo.DestroyObjectImmediate(oldMageCard);
+            Debug.Log("[Setup] MageCard removido da UI (Mago virou vilão)");
         }
 
         // Encontrar a Card existente
@@ -65,54 +74,79 @@ public static class QuickSetupCards
         Vector2 basePos = origRT != null ? origRT.anchoredPosition : Vector2.zero;
         Transform parent = originalCard.transform.parent;
 
-        // Wire HeroCard original para CardSystem.OnCardHeroClicked
+        // Hero removido — limpa referência e zera click handler
         if (cs != null)
         {
-            var origImg = originalCard.GetComponent<Image>();
-            if (origImg != null) { cs.cardImageHero = origImg; EditorUtility.SetDirty(cs); }
-            var origBtn = originalCard.GetComponent<Button>();
-            if (origBtn != null) WireOnClick(origBtn, cs, "OnCardHeroClicked");
+            cs.cardImageHero = null;
+            EditorUtility.SetDirty(cs);
         }
 
-        // Duplicar pra Golem
-        if (cs != null && cs.cardImageGolem == null)
+        // GolemCard
+        GameObject golemCard = GameObject.Find("GolemCard");
+        if (golemCard == null)
+            golemCard = DuplicateCard(originalCard, "GolemCard", parent, basePos);
+        if (cs != null)
         {
-            var golemCard = DuplicateCard(originalCard, "GolemCard", parent, basePos + new Vector2(110, 0));
             var img = golemCard.GetComponent<Image>();
             if (img != null) { cs.cardImageGolem = img; EditorUtility.SetDirty(cs); }
             var btn = golemCard.GetComponent<Button>();
             if (btn != null) WireOnClick(btn, cs, "OnCardGolemClicked");
+            var grt = golemCard.GetComponent<RectTransform>();
+            if (grt != null) grt.anchoredPosition = basePos;
         }
 
-        // Duplicar pra Mago
-        if (mcs != null && mcs.cardImage == null)
+        // LichCard
+        GameObject lichCard = GameObject.Find("LichCard");
+        if (lichCard == null)
+            lichCard = DuplicateCard(originalCard, "LichCard", parent, basePos + new Vector2(0, -160));
+        if (lcs != null)
         {
-            var mageCard = DuplicateCard(originalCard, "MageCard", parent, basePos + new Vector2(220, 0));
-            var img = mageCard.GetComponent<Image>();
-            if (img != null) { mcs.cardImage = img; EditorUtility.SetDirty(mcs); }
-            var btn = mageCard.GetComponent<Button>();
-            if (btn != null) WireOnClick(btn, mcs, "OnCardClicked");
-        }
-
-        // Duplicar pra Lich
-        if (lcs != null && lcs.cardImage == null)
-        {
-            var lichCard = DuplicateCard(originalCard, "LichCard", parent, basePos + new Vector2(330, 0));
             var img = lichCard.GetComponent<Image>();
             if (img != null) { lcs.cardImage = img; EditorUtility.SetDirty(lcs); }
             var btn = lichCard.GetComponent<Button>();
             if (btn != null) WireOnClick(btn, lcs, "OnCardClicked");
+            var lrt = lichCard.GetComponent<RectTransform>();
+            if (lrt != null) lrt.anchoredPosition = basePos + new Vector2(0, -160);
         }
 
+        // Destrói o card original do Hero (não usamos mais)
+        if (originalCard != golemCard && originalCard != lichCard)
+        {
+            Undo.DestroyObjectImmediate(originalCard);
+            Debug.Log("[Setup] HeroCard original removido");
+        }
+
+        // Mago não é mais carta — pulado.
+
         WireMapProgression();
+        WirePlayerLives();
 
         EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
         EditorSceneManager.SaveOpenScenes();
         Debug.Log("[Setup] Concluído. Cena salva.");
     }
 
+    static void WirePlayerLives()
+    {
+        GameObject grid = GameObject.Find("GridDeVida");
+        if (grid == null)
+        {
+            foreach (var t in Resources.FindObjectsOfTypeAll<Transform>())
+                if (t.name == "GridDeVida" && t.gameObject.scene.IsValid()) { grid = t.gameObject; break; }
+        }
+        if (grid == null) { Debug.LogWarning("[Setup] GridDeVida não encontrado"); return; }
+
+        var pl = grid.GetComponent<PlayerLives>();
+        if (pl == null) pl = grid.AddComponent<PlayerLives>();
+        pl.gridDeVida = grid.transform;
+        EditorUtility.SetDirty(pl);
+        Debug.Log($"[Setup] PlayerLives configurado em GridDeVida ({grid.transform.childCount} vidas)");
+    }
+
     static void WireMapProgression()
     {
+        var magoPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Manu/Mago.prefab");
+
         // Ordem: começa pelo mapa ativo. Padrão: Externo → Royal → Dungeon.
         string[] order = { "Mapa_Externo", "Mapa_Dungeon", "Mapa_Royal" };
         GameObject[] maps = new GameObject[order.Length];
@@ -153,6 +187,8 @@ public static class QuickSetupCards
                 sp.mapMax = refMax;
                 Debug.Log($"[Setup] {order[i]} bounds corrigidos para min={refMin} max={refMax}");
             }
+
+            if (magoPrefab != null) sp.magoPrefab = magoPrefab;
 
             sp.mapaAtual = maps[i];
             GameObject prox = (i + 1 < maps.Length) ? maps[i + 1] : null;

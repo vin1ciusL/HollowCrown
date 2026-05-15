@@ -59,6 +59,9 @@ public class LichHealth : MonoBehaviour
         invulnTimer = invulnerabilityDuration;
 
         if (currentHealth <= 0)
+        {
+            if (PlayerLives.Instance != null) PlayerLives.Instance.PerderVida();
             Destroy(gameObject);
+        }
     }
 }
