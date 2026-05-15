@@ -1,32 +1,32 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class LichAttack : MonoBehaviour
+public class MageAlly : MonoBehaviour
 {
     [Header("Projetil")]
-    public GameObject projectilePrefab;
+    public GameObject fireballPrefab;
     public Transform firePoint;
 
     [Header("Combate")]
-    public float attackRange = 10f;
-    public float fireRate = 1f;
-    public float damage = 20f;
+    public float attackRange = 9f;
+    public float fireRate = 0.7f;
+    public float damage = 12f;
 
     [Header("Movimento")]
-    public float moveSpeed = 1.5f;
-    public float followDistance = 3f;
+    public float moveSpeed = 1.8f;
+    public float followDistance = 3.5f;
 
     private float fireTimer = 0f;
     private Transform player;
     private Rigidbody2D rb;
-    private LichAnimator lichAnimator;
+    private MageAnimator mageAnimator;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
-        lichAnimator = GetComponent<LichAnimator>();
+        mageAnimator = GetComponent<MageAnimator>();
 
         GameObject hero = GameObject.FindWithTag("Player");
         if (hero != null) player = hero.transform;
@@ -61,33 +61,27 @@ public class LichAttack : MonoBehaviour
         float dist = Vector2.Distance(rb.position, player.position);
         if (dist > followDistance)
         {
-            Vector2 newPos = Vector2.MoveTowards(rb.position, player.position, moveSpeed * Time.fixedDeltaTime);
+            Vector2 newPos = Vector2.MoveTowards(
+                rb.position, player.position, moveSpeed * Time.fixedDeltaTime);
             rb.MovePosition(newPos);
         }
     }
 
     void Atirar(Transform alvo)
     {
-        if (lichAnimator != null) lichAnimator.TriggerAttack();
+        if (mageAnimator != null) mageAnimator.TriggerCast();
 
-        // Com projétil
-        if (projectilePrefab != null && firePoint != null)
+        if (fireballPrefab != null && firePoint != null)
         {
             Vector2 dir = ((Vector2)alvo.position - (Vector2)firePoint.position).normalized;
-            GameObject proj = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
-            LichProjectile lp = proj.GetComponent<LichProjectile>();
-            if (lp != null) { lp.Initialize(dir, damage); return; }
-
-            // Fallback: Fireball como projetil aliado
+            GameObject proj = Instantiate(fireballPrefab, firePoint.position, Quaternion.identity);
             Fireball fb = proj.GetComponent<Fireball>();
-            if (fb != null) { fb.Initialize(dir, damage, ally: true); return; }
+            if (fb != null) fb.Initialize(dir, damage, ally: true);
             return;
         }
 
-        // Sem projétil: dano direto se estiver perto
         VillainHealth vh = alvo.GetComponent<VillainHealth>();
-        if (vh != null)
-            vh.TakeDamage(damage);
+        if (vh != null) vh.TakeDamage(damage);
     }
 
     VillainHealth EncontrarVilaoMaisProximo()
@@ -110,7 +104,7 @@ public class LichAttack : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
-        Gizmos.color = Color.cyan;
+        Gizmos.color = Color.magenta;
         Gizmos.DrawWireSphere(transform.position, attackRange);
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(transform.position, followDistance);

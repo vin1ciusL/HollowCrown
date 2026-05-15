@@ -177,18 +177,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 2195004351814422930}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9e2b57aa30cf0814ca4b2f8289690289, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MageAttack
-  fireballPrefab: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: 0584420e76bc17d43b34ae3ef28ee362, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::MageAlly
+  fireballPrefab: {fileID: 4260329344143187683, guid: db1ef39b187cf8641b3b7eb19272fad4, type: 3}
   firePoint: {fileID: 6484564403987031652}
-  attackRange: 8
-  fireRate: 0.5
-  damage: 15
-  moveSpeed: 1.5
-  minDistance: 4
-  mapMin: {x: -15, y: -10}
-  mapMax: {x: 15, y: 10}
+  attackRange: 9
+  fireRate: 0.7
+  damage: 12
+  moveSpeed: 1.8
+  followDistance: 3.5
 --- !u!1 &6659322898675249594
 GameObject:
   m_ObjectHideFlags: 0

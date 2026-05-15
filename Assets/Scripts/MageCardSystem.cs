@@ -3,10 +3,10 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
-public class LichCardSystem : MonoBehaviour
+public class MageCardSystem : MonoBehaviour
 {
     [Header("Referencias")]
-    public GameObject lichPrefab;
+    public GameObject magePrefab;
     public Image cardImage;
     public Camera mainCamera;
 
@@ -18,11 +18,11 @@ public class LichCardSystem : MonoBehaviour
     public float spawnCheckRadius = 0.5f;
 
     [Header("Custo")]
-    [Tooltip("Custo em almas para invocar o Lich")]
-    public int custoInvocacao = 120;
+    [Tooltip("Custo em almas para invocar o Mago")]
+    public int custoInvocacao = 100;
 
     private bool cardSelected = false;
-    private GameObject lichInstance = null;
+    private GameObject mageInstance = null;
 
     void Update()
     {
@@ -32,25 +32,26 @@ public class LichCardSystem : MonoBehaviour
                 return;
 
             if (cardSelected)
-                TrySpawnLich();
+                TrySpawnMage();
         }
     }
 
     public void OnCardClicked()
     {
-        if (lichInstance != null && lichInstance.activeInHierarchy)
+        if (mageInstance != null && mageInstance.activeInHierarchy)
             return;
 
-        lichInstance = null;
+        mageInstance = null;
         cardSelected = !cardSelected;
-        cardImage.color = cardSelected ? colorSelected : colorDefault;
+        if (cardImage != null)
+            cardImage.color = cardSelected ? colorSelected : colorDefault;
     }
 
-    void TrySpawnLich()
+    void TrySpawnMage()
     {
-        if (lichPrefab == null)
+        if (magePrefab == null)
         {
-            Debug.LogError("[LichCardSystem] lichPrefab nao atribuido!");
+            Debug.LogError("[MageCardSystem] magePrefab nao atribuido!");
             return;
         }
 
@@ -58,7 +59,7 @@ public class LichCardSystem : MonoBehaviour
 
         if (SoulManager.Instance.AlmasAtuais < custoInvocacao)
         {
-            Debug.Log($"[LichCardSystem] Almas insuficientes! Necessário: {custoInvocacao}, atual: {SoulManager.Instance.AlmasAtuais}");
+            Debug.Log($"[MageCardSystem] Almas insuficientes! Necessário: {custoInvocacao}, atual: {SoulManager.Instance.AlmasAtuais}");
             return;
         }
 
@@ -70,20 +71,21 @@ public class LichCardSystem : MonoBehaviour
         Collider2D hit = Physics2D.OverlapCircle(worldPos, spawnCheckRadius);
         if (hit != null)
         {
-            Debug.Log("[LichCardSystem] Local bloqueado por: " + hit.gameObject.name);
+            Debug.Log("[MageCardSystem] Local bloqueado por: " + hit.gameObject.name);
             return;
         }
 
         if (!SoulManager.Instance.TentarGastar(custoInvocacao))
             return;
 
-        if (lichInstance != null)
-            Destroy(lichInstance);
+        if (mageInstance != null)
+            Destroy(mageInstance);
 
-        lichInstance = Instantiate(lichPrefab, worldPos, Quaternion.identity);
-        Debug.Log("[LichCardSystem] Lich invocado em " + worldPos);
+        mageInstance = Instantiate(magePrefab, worldPos, Quaternion.identity);
+        Debug.Log("[MageCardSystem] Mago invocado em " + worldPos);
 
         cardSelected = false;
-        cardImage.color = colorDefault;
+        if (cardImage != null)
+            cardImage.color = colorDefault;
     }
 }

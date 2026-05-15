@@ -158,8 +158,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f70692fab95c0f24a9729731d9697399, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LichAttack
-  projectilePrefab: {fileID: 0}
-  firePoint: {fileID: 0}
+  projectilePrefab: {fileID: 4260329344143187683, guid: db1ef39b187cf8641b3b7eb19272fad4, type: 3}
+  firePoint: {fileID: 8292054993672899521}
   attackRange: 10
   fireRate: 1
   damage: 20

@@ -17,7 +17,10 @@ public class VillainController : MonoBehaviour
 
     private Rigidbody2D rb;
     private Transform hero;
-    private bool heroFound = false;
+    private Transform golem;
+    private Transform mage;
+    private float retargetTimer = 0f;
+    private const float retargetInterval = 0.5f;
 
     void Awake()
     {
@@ -28,20 +31,27 @@ public class VillainController : MonoBehaviour
 
     void Start()
     {
-        BuscarHeroi();
+        BuscarAlvos();
     }
 
-    void BuscarHeroi()
+    void BuscarAlvos()
     {
-        GameObject heroObj = GameObject.FindWithTag("Player");
-        if (heroObj != null)
+        if (hero == null)
         {
-            hero = heroObj.transform;
-            heroFound = true;
+            GameObject heroObj = GameObject.FindWithTag("Player");
+            hero = heroObj != null ? heroObj.transform : null;
         }
-        else
+
+        if (golem == null)
         {
-            heroFound = false;
+            GolemHealth g = Object.FindAnyObjectByType<GolemHealth>();
+            golem = (g != null && g.gameObject.activeInHierarchy) ? g.transform : null;
+        }
+
+        if (mage == null)
+        {
+            MageHealth m = Object.FindAnyObjectByType<MageHealth>();
+            mage = (m != null && m.gameObject.activeInHierarchy) ? m.transform : null;
         }
     }
 
@@ -50,27 +60,36 @@ public class VillainController : MonoBehaviour
         Transform alvo = null;
         float menorDist = float.MaxValue;
 
-        if (hero != null)
-        {
-            menorDist = Vector2.Distance(rb.position, hero.position);
-            alvo = hero;
-        }
+        ConsiderarAlvo(hero, ref alvo, ref menorDist);
+        ConsiderarAlvo(golem, ref alvo, ref menorDist);
+        ConsiderarAlvo(mage, ref alvo, ref menorDist);
 
         LichHealth lich = LichHealth.Instance;
         if (lich != null)
-        {
-            float d = Vector2.Distance(rb.position, lich.transform.position);
-            if (d < menorDist)
-                alvo = lich.transform;
-        }
+            ConsiderarAlvo(lich.transform, ref alvo, ref menorDist);
 
         return alvo;
     }
 
+    void ConsiderarAlvo(Transform t, ref Transform alvo, ref float menorDist)
+    {
+        if (t == null || !t.gameObject.activeInHierarchy) return;
+        float d = Vector2.Distance(rb.position, t.position);
+        if (d < menorDist)
+        {
+            menorDist = d;
+            alvo = t;
+        }
+    }
+
     void Update()
     {
-        if (!heroFound)
-            BuscarHeroi();
+        retargetTimer += Time.deltaTime;
+        if (retargetTimer >= retargetInterval)
+        {
+            retargetTimer = 0f;
+            BuscarAlvos();
+        }
     }
 
     void FixedUpdate()
@@ -130,7 +149,13 @@ public class VillainController : MonoBehaviour
         {
             if (hit.collider.gameObject == gameObject) continue;
             if (hit.collider.isTrigger) continue;
-            if (hit.collider.CompareTag("Player")) continue;
+            // Ignora qualquer entidade viva (não bloqueia path)
+            GameObject go = hit.collider.gameObject;
+            if (go.GetComponentInParent<HeroHealth>() != null) continue;
+            if (go.GetComponentInParent<GolemHealth>() != null) continue;
+            if (go.GetComponentInParent<MageHealth>() != null) continue;
+            if (go.GetComponentInParent<LichHealth>() != null) continue;
+            if (go.GetComponentInParent<VillainHealth>() != null) continue;
             return true;
         }
         return false;
@@ -144,10 +169,8 @@ public class VillainController : MonoBehaviour
         return new Vector2(cos * v.x - sin * v.y, sin * v.x + cos * v.y);
     }
 
-    // Chamado quando o herói é destruído ou desativado
     void OnHeroLost()
     {
-        heroFound = false;
         hero = null;
     }
 

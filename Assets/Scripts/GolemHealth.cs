@@ -12,13 +12,19 @@ public class GolemHealth : MonoBehaviour
     public float aoeRadius = 2.5f;
     public float attackCooldown = 1.5f;
 
+    [Header("Invulnerabilidade")]
+    public float invulnerabilityDuration = 0.5f;
+
     private float attackTimer = 0f;
+    private float invulnTimer = 0f;
     private GolemAnimator golemAnimator;
+    private SpriteRenderer sr;
 
     void Start()
     {
         currentHealth = maxHealth;
         golemAnimator = GetComponent<GolemAnimator>();
+        sr = GetComponentInChildren<SpriteRenderer>();
     }
 
     void Update()
@@ -26,6 +32,21 @@ public class GolemHealth : MonoBehaviour
         attackTimer += Time.deltaTime;
         if (attackTimer >= attackCooldown)
             TryAttack();
+
+        if (invulnTimer > 0f)
+        {
+            invulnTimer -= Time.deltaTime;
+            if (sr != null)
+            {
+                Color c = sr.color;
+                c.a = Mathf.PingPong(Time.time * 10f, 1f) * 0.5f + 0.5f;
+                sr.color = c;
+            }
+            if (invulnTimer <= 0f && sr != null)
+            {
+                Color c = sr.color; c.a = 1f; sr.color = c;
+            }
+        }
     }
 
     void TryAttack()
@@ -67,7 +88,11 @@ public class GolemHealth : MonoBehaviour
 
     public void TakeDamage(float damage)
     {
+        if (invulnTimer > 0f) return;
+
         currentHealth -= damage;
+        invulnTimer = invulnerabilityDuration;
+
         if (currentHealth <= 0)
             gameObject.SetActive(false);
     }

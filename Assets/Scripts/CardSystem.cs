@@ -8,10 +8,14 @@ public class CardSystem : MonoBehaviour
     [Header("Carta 1 - Esqueleto")]
     public GameObject heroPrefab;
     public Image cardImageHero;
+    [Tooltip("Custo em almas para invocar o Esqueleto")]
+    public int custoHero = 30;
 
     [Header("Carta 2 - Golem")]
     public GameObject golemPrefab;
     public Image cardImageGolem;
+    [Tooltip("Custo em almas para invocar o Golem")]
+    public int custoGolem = 80;
 
     [Header("Cores")]
     public Color colorDefault = Color.white;
@@ -68,10 +72,13 @@ public class CardSystem : MonoBehaviour
 
     void TrySpawnUnit()
     {
-        // Verifica se há almas suficientes antes de qualquer coisa
-        if (SoulManager.Instance == null || !SoulManager.Instance.PodeInvocar())
+        if (SoulManager.Instance == null) return;
+
+        int custo = cardSelecionada == 1 ? custoHero : custoGolem;
+
+        if (SoulManager.Instance.AlmasAtuais < custo)
         {
-            Debug.Log("[CardSystem] Almas insuficientes para invocar!");
+            Debug.Log($"[CardSystem] Almas insuficientes! Necessário: {custo}, atual: {SoulManager.Instance.AlmasAtuais}");
             return;
         }
 
@@ -87,8 +94,7 @@ public class CardSystem : MonoBehaviour
             return;
         }
 
-        // Gasta as almas (double-check interno)
-        if (!SoulManager.Instance.TentarGastarParaInvocacao())
+        if (!SoulManager.Instance.TentarGastar(custo))
             return;
 
         if (cardSelecionada == 1)
