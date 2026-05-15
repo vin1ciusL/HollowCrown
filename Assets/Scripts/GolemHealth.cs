@@ -94,7 +94,10 @@ public class GolemHealth : MonoBehaviour
         invulnTimer = invulnerabilityDuration;
 
         if (currentHealth <= 0)
+        {
+            if (PlayerLives.Instance != null) PlayerLives.Instance.PerderVida();
             gameObject.SetActive(false);
+        }
     }
 
     void OnDrawGizmosSelected()

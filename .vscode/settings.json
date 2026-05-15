@@ -67,6 +67,6 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "Hollow.slnx",
+    "dotnet.defaultSolution": "HollowCrown.slnx",
     "dotnet.enableWorkspaceBasedDevelopment": false
 }

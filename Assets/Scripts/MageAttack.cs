@@ -8,7 +8,7 @@ public class MageAttack : MonoBehaviour
     [Header("Ataque")]
     public float attackRange = 8f;
     public float fireRate = 0.5f;
-    public float damage = 15f;
+    public float damage = 0f;
 
     [Header("Movimento")]
     public float moveSpeed = 1.5f;
@@ -22,42 +22,25 @@ public class MageAttack : MonoBehaviour
     private Transform target;
     private MageAnimator mageAnimator;
     private Rigidbody2D rb;
-    private Vector2 boundsMin;
-    private Vector2 boundsMax;
 
     void Start()
     {
         mageAnimator = GetComponent<MageAnimator>();
         rb = GetComponent<Rigidbody2D>();
-
-        // Se os limites não foram definidos, usa os bounds da câmera
-        if (mapMin == Vector2.zero && mapMax == Vector2.zero)
+        if (rb != null)
         {
-            Camera cam = Camera.main;
-            if (cam != null)
-            {
-                boundsMin = cam.ViewportToWorldPoint(new Vector3(0, 0, 0));
-                boundsMax = cam.ViewportToWorldPoint(new Vector3(1, 1, 0));
-            }
+            rb.gravityScale = 0f;
+            rb.freezeRotation = true;
         }
-        else
-        {
-            boundsMin = mapMin;
-            boundsMax = mapMax;
-        }
+        Debug.Log($"[MageAttack] Spawn em {transform.position} | fireball={(fireballPrefab!=null)} firePoint={(firePoint!=null)}");
     }
 
     void Update()
     {
-        if (target == null)
-        {
-            GameObject hero = GameObject.FindWithTag("Player");
-            if (hero != null) target = hero.transform;
-            else return;
-        }
+        target = EncontrarAlvoMaisProximo();
+        if (target == null) return;
 
         float dist = Vector2.Distance(transform.position, target.position);
-
         if (dist > attackRange) return;
 
         fireTimer += Time.deltaTime;
@@ -68,24 +51,44 @@ public class MageAttack : MonoBehaviour
         }
     }
 
+    Transform EncontrarAlvoMaisProximo()
+    {
+        Transform alvo = null;
+        float menorDist = float.MaxValue;
+
+        GameObject heroObj = GameObject.FindWithTag("Player");
+        if (heroObj != null)
+        {
+            float d = Vector2.Distance(transform.position, heroObj.transform.position);
+            if (d < menorDist) { menorDist = d; alvo = heroObj.transform; }
+        }
+
+        GolemHealth golem = Object.FindAnyObjectByType<GolemHealth>();
+        if (golem != null)
+        {
+            float d = Vector2.Distance(transform.position, golem.transform.position);
+            if (d < menorDist) { menorDist = d; alvo = golem.transform; }
+        }
+
+        LichHealth lich = LichHealth.Instance;
+        if (lich != null)
+        {
+            float d = Vector2.Distance(transform.position, lich.transform.position);
+            if (d < menorDist) { menorDist = d; alvo = lich.transform; }
+        }
+
+        return alvo;
+    }
+
     void FixedUpdate()
     {
         if (target == null || rb == null) return;
 
-        // Só segue até os limites do mapa — ignora se o alvo saiu
-        Vector2 clampedTarget = new Vector2(
-            Mathf.Clamp(target.position.x, boundsMin.x, boundsMax.x),
-            Mathf.Clamp(target.position.y, boundsMin.y, boundsMax.y));
-
-        float dist = Vector2.Distance(rb.position, clampedTarget);
+        float dist = Vector2.Distance(rb.position, (Vector2)target.position);
         if (dist > minDistance)
         {
             Vector2 newPos = Vector2.MoveTowards(
-                rb.position, clampedTarget, moveSpeed * Time.fixedDeltaTime);
-
-            newPos.x = Mathf.Clamp(newPos.x, boundsMin.x, boundsMax.x);
-            newPos.y = Mathf.Clamp(newPos.y, boundsMin.y, boundsMax.y);
-
+                rb.position, target.position, moveSpeed * Time.fixedDeltaTime);
             rb.MovePosition(newPos);
         }
     }
@@ -103,7 +106,10 @@ public class MageAttack : MonoBehaviour
         GameObject fireball = Instantiate(fireballPrefab, firePoint.position, Quaternion.identity);
         Fireball fb = fireball.GetComponent<Fireball>();
         if (fb != null)
+        {
             fb.Initialize(direction, damage);
+            Debug.Log($"[MageAttack] Disparou fireball -> {target.name} (dist={Vector2.Distance(transform.position, target.position):F1})");
+        }
         else
             Debug.LogError("[MageAttack] Script Fireball.cs NAO encontrado no prefab!");
     }

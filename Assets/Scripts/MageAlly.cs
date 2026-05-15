@@ -10,7 +10,7 @@ public class MageAlly : MonoBehaviour
     [Header("Combate")]
     public float attackRange = 9f;
     public float fireRate = 0.7f;
-    public float damage = 12f;
+    public float damage = 0f;
 
     [Header("Movimento")]
     public float moveSpeed = 1.8f;

@@ -37,6 +37,7 @@ public class MageHealth : MonoBehaviour
     void Die()
     {
         Debug.Log("Mago morreu!");
+        if (PlayerLives.Instance != null) PlayerLives.Instance.PerderVida();
         gameObject.SetActive(false);
     }
 }

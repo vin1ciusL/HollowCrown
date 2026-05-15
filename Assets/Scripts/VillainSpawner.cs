@@ -5,6 +5,7 @@ public class VillainSpawner : MonoBehaviour
 {
     [Header("Spawn")]
     public GameObject villainPrefab;
+    public GameObject magoPrefab;
     public float spawnOffsetY = 1.5f;
     public float delayEntreSpawns = 0.3f;
     public float delayAntesDeTrocar = 2f;
@@ -18,6 +19,7 @@ public class VillainSpawner : MonoBehaviour
 
     [Header("Ondas")]
     public int[] inimigosPorturno = { 2, 3, 4 };
+    public int[] magosPorturno = { 0, 1, 2 };
     public float delayEntreOndas = 3f;
 
     [Header("Próxima Fase")]
@@ -62,24 +64,32 @@ public class VillainSpawner : MonoBehaviour
             return;
         }
 
-        int quantidade = inimigosPorturno[ondaAtual];
-        Debug.Log($"Onda {ondaAtual + 1} — {quantidade} inimigos");
-        inimigosVivos = quantidade;
-        StartCoroutine(SpawnarTurno(quantidade));
+        int qtdVilao = inimigosPorturno[ondaAtual];
+        int qtdMago = (magosPorturno != null && ondaAtual < magosPorturno.Length) ? magosPorturno[ondaAtual] : 0;
+        if (magoPrefab == null) qtdMago = 0;
+
+        Debug.Log($"Onda {ondaAtual + 1} — {qtdVilao} vilões + {qtdMago} magos");
+        inimigosVivos = qtdVilao + qtdMago;
+        StartCoroutine(SpawnarTurno(qtdVilao, qtdMago));
     }
 
-    IEnumerator SpawnarTurno(int quantidade)
+    IEnumerator SpawnarTurno(int qtdVilao, int qtdMago)
     {
-        for (int i = 0; i < quantidade; i++)
+        for (int i = 0; i < qtdVilao; i++)
         {
-            SpawnVillain();
+            SpawnInimigo(villainPrefab);
+            yield return new WaitForSeconds(delayEntreSpawns);
+        }
+        for (int i = 0; i < qtdMago; i++)
+        {
+            SpawnInimigo(magoPrefab);
             yield return new WaitForSeconds(delayEntreSpawns);
         }
     }
 
-    void SpawnVillain()
+    void SpawnInimigo(GameObject prefab)
     {
-        if (villainPrefab == null) return;
+        if (prefab == null) return;
 
         Vector3 spawnPos = EncontrarPosicaoSegura();
         if (spawnPos == Vector3.zero)
@@ -89,7 +99,7 @@ public class VillainSpawner : MonoBehaviour
             spawnPos.z = 0f;
         }
 
-        GameObject v = Instantiate(villainPrefab, spawnPos, Quaternion.identity);
+        GameObject v = Instantiate(prefab, spawnPos, Quaternion.identity);
 
         VillainHealth vh = v.GetComponent<VillainHealth>();
         if (vh != null)
