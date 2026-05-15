@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 301234622605455883}
   - component: {fileID: 2509020614154466740}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Attack
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -79,7 +79,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 4
+  m_SortingOrder: 10
   m_MaskInteraction: 0
   m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -101,7 +101,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4054976940071537623}
   - component: {fileID: 728346564643023534}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -170,7 +170,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 3
+  m_SortingOrder: 10
   m_MaskInteraction: 0
   m_Sprite: {fileID: 4405123206230682195, guid: 437118381ee5ca44ea6f13001a293e97, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -192,7 +192,7 @@ GameObject:
   m_Component:
   - component: {fileID: 920415046949654278}
   - component: {fileID: 1494017298554535667}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -261,7 +261,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 2
+  m_SortingOrder: 10
   m_MaskInteraction: 0
   m_Sprite: {fileID: 1368988699430867811, guid: e877f186efddfce4780c20ed566ddbe2, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -288,7 +288,7 @@ GameObject:
   - component: {fileID: -5870165535001351085}
   - component: {fileID: 8379933530301869058}
   - component: {fileID: 6016792671023139838}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Hero
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -356,6 +356,12 @@ MonoBehaviour:
   attackRange: 6
   stopDistance: 0.8
   showGizmos: 1
+  stuckTimeThreshold: 1.2
+  stuckSpeedThreshold: 0.15
+  unstuckForce: 5
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!114 &8100994188236259051
 MonoBehaviour:
   m_ObjectHideFlags: 0

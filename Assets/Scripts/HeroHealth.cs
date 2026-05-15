@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class HeroHealth : MonoBehaviour
 {
@@ -31,7 +32,7 @@ public class HeroHealth : MonoBehaviour
     {
         attackTimer = 0f;
 
-        foreach (VillainHealth villain in VillainHealth.All)
+        foreach (VillainHealth villain in new List<VillainHealth>(VillainHealth.All))
         {
             if (Vector2.Distance(transform.position, villain.transform.position) <= attackRange)
             {
@@ -41,8 +42,7 @@ public class HeroHealth : MonoBehaviour
             }
         }
 
-        // Também ataca o Mago se estiver no alcance
-        MageHealth mage = FindFirstObjectByType<MageHealth>();
+        MageHealth mage = FindAnyObjectByType<MageHealth>();
         if (mage != null && mage.gameObject.activeSelf &&
             Vector2.Distance(transform.position, mage.transform.position) <= attackRange)
         {

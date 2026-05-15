@@ -5,21 +5,25 @@ using UnityEngine.InputSystem;
 
 public class CardSystem : MonoBehaviour
 {
-    [Header("Referências")]
+    [Header("Carta 1 - Esqueleto")]
     public GameObject heroPrefab;
-    public Image cardImage;
-    public Camera mainCamera;
+    public Image cardImageHero;
+
+    [Header("Carta 2 - Golem")]
+    public GameObject golemPrefab;
+    public Image cardImageGolem;
 
     [Header("Cores")]
     public Color colorDefault = Color.white;
     public Color colorSelected = Color.red;
 
     [Header("Spawn")]
-    [Tooltip("Raio para checar se o local está livre de colisores")]
     public float spawnCheckRadius = 0.5f;
+    public Camera mainCamera;
 
-    private bool cardSelected = false;
-    private GameObject heroInstance = null;
+    private int cardSelecionada = 0;
+    private GameObject skeletonInstance = null;
+    private GameObject golemInstance = null;
 
     void Update()
     {
@@ -28,21 +32,41 @@ public class CardSystem : MonoBehaviour
             if (EventSystem.current.IsPointerOverGameObject())
                 return;
 
-            if (cardSelected)
-                TrySpawnHero();
+            if (cardSelecionada != 0)
+                TrySpawnUnit();
         }
     }
 
-    public void OnCardClicked()
+    public void OnCardHeroClicked()
     {
-        if (heroInstance != null && heroInstance.activeInHierarchy)
+        if (skeletonInstance != null && skeletonInstance.activeInHierarchy)
             return;
 
-        cardSelected = !cardSelected;
-        cardImage.color = cardSelected ? colorSelected : colorDefault;
+        skeletonInstance = null;
+        cardSelecionada = cardSelecionada == 1 ? 0 : 1;
+        AtualizarCores();
     }
 
-    void TrySpawnHero()
+    public void OnCardGolemClicked()
+    {
+        if (golemInstance != null && golemInstance.activeInHierarchy)
+            return;
+
+        golemInstance = null;
+        cardSelecionada = cardSelecionada == 2 ? 0 : 2;
+        AtualizarCores();
+    }
+
+    void AtualizarCores()
+    {
+        if (cardImageHero != null)
+            cardImageHero.color = cardSelecionada == 1 ? colorSelected : colorDefault;
+
+        if (cardImageGolem != null)
+            cardImageGolem.color = cardSelecionada == 2 ? colorSelected : colorDefault;
+    }
+
+    void TrySpawnUnit()
     {
         // Verifica se há almas suficientes antes de qualquer coisa
         if (SoulManager.Instance == null || !SoulManager.Instance.PodeInvocar())
@@ -56,24 +80,31 @@ public class CardSystem : MonoBehaviour
         Vector3 worldPos = mainCamera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, camZ));
         worldPos.z = 0f;
 
-        // Checa se tem algum colisor no local
         Collider2D hit = Physics2D.OverlapCircle(worldPos, spawnCheckRadius);
         if (hit != null)
         {
             Debug.Log("Local bloqueado por: " + hit.gameObject.name);
-            return; // Não spawna
+            return;
         }
 
         // Gasta as almas (double-check interno)
         if (!SoulManager.Instance.TentarGastarParaInvocacao())
             return;
 
-        if (heroInstance != null)
-            Destroy(heroInstance);
+        if (cardSelecionada == 1)
+        {
+            if (skeletonInstance != null)
+                Destroy(skeletonInstance);
+            skeletonInstance = Instantiate(heroPrefab, worldPos, Quaternion.identity);
+        }
+        else if (cardSelecionada == 2)
+        {
+            if (golemInstance != null)
+                Destroy(golemInstance);
+            golemInstance = Instantiate(golemPrefab, worldPos, Quaternion.identity);
+        }
 
-        heroInstance = Instantiate(heroPrefab, worldPos, Quaternion.identity);
-
-        cardSelected = false;
-        cardImage.color = colorDefault;
+        cardSelecionada = 0;
+        AtualizarCores();
     }
 }

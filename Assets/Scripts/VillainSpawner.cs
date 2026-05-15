@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 using System.Collections;
 
 public class VillainSpawner : MonoBehaviour
@@ -17,6 +16,17 @@ public class VillainSpawner : MonoBehaviour
     [Header("Próxima Fase")]
     public GameObject mapaAtual;
     public GameObject proximoMapa;
+    public Vector2 posicaoCameraProximoMapa;
+
+    [Header("Spawn Seguro")]
+    [Tooltip("Margem interna do viewport para não spawnar nas bordas")]
+    public float viewportMargin = 0.10f;
+    [Tooltip("Raio para checar se o ponto de spawn está livre de obstáculos")]
+    public float spawnCheckRadius = 0.5f;
+    [Tooltip("Máximo de tentativas para encontrar posição válida")]
+    public int maxSpawnAttempts = 15;
+    [Tooltip("Collider2D do mapa — se atribuído, spawn só dentro dele")]
+    public Collider2D mapBounds;
 
     private Camera cam;
     private int ondaAtual = 0;
@@ -64,16 +74,51 @@ public class VillainSpawner : MonoBehaviour
     {
         if (villainPrefab == null) return;
 
-        Vector3 min = cam.ViewportToWorldPoint(new Vector3(0.05f, 0.05f, 0));
-        Vector3 max = cam.ViewportToWorldPoint(new Vector3(0.95f, 0.95f, 0));
-
-        Vector3 spawnPos = new Vector3(Random.Range(min.x, max.x), min.y + spawnOffsetY, 0);
+        Vector3 spawnPos = EncontrarPosicaoSegura();
+        if (spawnPos == Vector3.zero)
+        {
+            Debug.LogWarning("[VillainSpawner] Não foi possível encontrar posição segura para spawn!");
+            // Fallback: spawna no centro da câmera
+            spawnPos = cam.transform.position;
+            spawnPos.z = 0f;
+        }
 
         GameObject v = Instantiate(villainPrefab, spawnPos, Quaternion.identity);
 
         VillainHealth vh = v.GetComponent<VillainHealth>();
         if (vh != null)
             vh.OnMorte += OnInimigoMorreu;
+    }
+
+    /// <summary>
+    /// Tenta encontrar uma posição de spawn que esteja:
+    /// 1) Dentro dos limites do viewport da câmera (com margem)
+    /// 2) Dentro do Collider do mapa (se atribuído)
+    /// 3) Livre de obstáculos físicos
+    /// </summary>
+    Vector3 EncontrarPosicaoSegura()
+    {
+        for (int tentativa = 0; tentativa < maxSpawnAttempts; tentativa++)
+        {
+            // Gera ponto aleatório dentro do viewport com margem
+            float vx = Random.Range(viewportMargin, 1f - viewportMargin);
+            float vy = Random.Range(viewportMargin, 1f - viewportMargin);
+            Vector3 worldPos = cam.ViewportToWorldPoint(new Vector3(vx, vy, 0));
+            worldPos.z = 0f;
+
+            // Verifica se está dentro dos limites do mapa
+            if (mapBounds != null && !mapBounds.OverlapPoint(worldPos))
+                continue;
+
+            // Verifica se a posição está livre de obstáculos sólidos
+            Collider2D obstruction = Physics2D.OverlapCircle(worldPos, spawnCheckRadius);
+            if (obstruction != null && !obstruction.isTrigger)
+                continue;
+
+            return worldPos;
+        }
+
+        return Vector3.zero; // Nenhuma posição válida encontrada
     }
 
     void OnInimigoMorreu()
@@ -92,30 +137,47 @@ public class VillainSpawner : MonoBehaviour
     {
         yield return new WaitForSeconds(delayEntreOndas);
         ondaAtual++;
-        IniciarTurno();
+
+        // Se ainda há ondas restantes, mostra a tela de buff
+        if (ondaAtual < inimigosPorturno.Length)
+        {
+            if (WaveBuffUI.Instance != null)
+            {
+                // Mostra UI de buff e espera o jogador escolher
+                WaveBuffUI.Instance.MostrarEscolha(() =>
+                {
+                    // Callback: após o jogador escolher, inicia o próximo turno
+                    IniciarTurno();
+                });
+            }
+            else
+            {
+                // Sem sistema de buff configurado — prossegue normalmente
+                IniciarTurno();
+            }
+        }
+        else
+        {
+            IniciarTurno(); // vai chamar FinalizarJogo()
+        }
     }
 
     IEnumerator FinalizarJogo()
     {
-        GameObject hero = GameObject.FindWithTag("Player");
-        hero?.SetActive(false);
-
-        // Zera o target da câmera para ela não lutar contra o teleporte
-        CameraFollow cf = Camera.main.GetComponent<CameraFollow>();
-        if (cf != null) cf.target = null;
+        foreach (GameObject hero in GameObject.FindGameObjectsWithTag("Player"))
+            hero.SetActive(false);
 
         yield return new WaitForSeconds(delayAntesDeTrocar);
 
+        if (mapaAtual != null) mapaAtual.SetActive(false);
         if (proximoMapa != null)
         {
-            // Desativa o light do mapa atual antes de ativar o próximo para evitar conflito de Global Light
-            Light2D luz = mapaAtual?.GetComponentInChildren<Light2D>();
-            if (luz != null) luz.enabled = false;
-
             proximoMapa.SetActive(true);
+            Camera.main.transform.position = new Vector3(
+                posicaoCameraProximoMapa.x,
+                posicaoCameraProximoMapa.y,
+                -10f
+            );
         }
-
-        // Desativa o mapa atual POR ÚLTIMO para não matar esta coroutine antes de terminar
-        mapaAtual?.SetActive(false);
     }
 }

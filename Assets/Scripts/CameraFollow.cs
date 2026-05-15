@@ -8,6 +8,10 @@ public class CameraFollow : MonoBehaviour
 
     void LateUpdate()
     {
+        // Se o target foi desativado, limpa a referência
+        if (target != null && !target.gameObject.activeInHierarchy)
+            target = null;
+
         if (target == null)
         {
             GameObject hero = GameObject.FindWithTag("Player");

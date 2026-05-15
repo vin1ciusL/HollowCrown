@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1087016753819791490}
   - component: {fileID: 4783005949166948856}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -79,7 +79,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 2
+  m_SortingOrder: 10
   m_MaskInteraction: 0
   m_Sprite: {fileID: -820382191472793964, guid: f249abaa0ca603644a35c71612af21ad, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -105,7 +105,7 @@ GameObject:
   - component: {fileID: -6102911277391598528}
   - component: {fileID: 3002085675206342618}
   - component: {fileID: 2330284618411022561}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: VIllain
   m_TagString: Villain
   m_Icon: {fileID: 0}
@@ -172,6 +172,12 @@ MonoBehaviour:
   moveSpeed: 3
   detectionRange: 999
   stopDistance: 0.8
+  stuckTimeThreshold: 1.5
+  stuckSpeedThreshold: 0.15
+  unstuckForce: 4
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 64
   showGizmos: 1
 --- !u!114 &-6102911277391598528
 MonoBehaviour:
@@ -190,6 +196,7 @@ MonoBehaviour:
   attackDamage: 5
   attackRange: 1
   attackCooldown: 1
+  almasRecompensa: 10
 --- !u!61 &3002085675206342618
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -343,7 +350,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8528789977833190574}
   - component: {fileID: 1560256155136959039}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -412,7 +419,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 3
+  m_SortingOrder: 10
   m_MaskInteraction: 0
   m_Sprite: {fileID: 1179784173572397370, guid: 998a591a207d45b41a614826618b3991, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -434,7 +441,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8233828521650007668}
   - component: {fileID: 5179834123447458697}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Attack
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -503,7 +510,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 4
+  m_SortingOrder: 10
   m_MaskInteraction: 0
   m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
