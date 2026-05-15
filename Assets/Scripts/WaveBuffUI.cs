@@ -66,17 +66,17 @@ public class WaveBuffUI : MonoBehaviour
         {
             new BuffOption {
                 nome = "Lâmina Afiada",
-                descricao = "+5 Dano para aliados",
+                descricao = "+5 Dano",
                 aplicar = () => bonusDamage += 5f
             },
             new BuffOption {
                 nome = "Pele de Ferro",
-                descricao = "+30 Vida máx. para aliados",
+                descricao = "+30 HP",
                 aplicar = () => bonusHealth += 30f
             },
             new BuffOption {
                 nome = "Botas de Vento",
-                descricao = "+1 Velocidade para aliados",
+                descricao = "+1 Vel",
                 aplicar = () => bonusSpeed += 1f
             },
             new BuffOption {
@@ -91,12 +91,12 @@ public class WaveBuffUI : MonoBehaviour
             },
             new BuffOption {
                 nome = "Adrenalina",
-                descricao = "Velocidade x1.15",
+                descricao = "Vel x1.15",
                 aplicar = () => multSpeed *= 1.15f
             },
             new BuffOption {
                 nome = "Coleta de Almas",
-                descricao = "+5 Almas/seg",
+                descricao = "+5 Almas/s",
                 aplicar = () => {
                     bonusRegenAlmas += 5f;
                     if (SoulManager.Instance != null)
@@ -105,17 +105,17 @@ public class WaveBuffUI : MonoBehaviour
             },
             new BuffOption {
                 nome = "Frenesi",
-                descricao = "Ataque 15% mais rápido",
+                descricao = "Ataque +15%",
                 aplicar = () => bonusAttackSpeed += 0.15f
             },
             new BuffOption {
                 nome = "Cura Instantânea",
-                descricao = "Cura todos os aliados em 50%",
+                descricao = "Cura +50%",
                 aplicar = () => CurarTodosAliados(0.5f)
             },
             new BuffOption {
                 nome = "Reforço de Almas",
-                descricao = "+80 Almas imediatas",
+                descricao = "+80 Almas",
                 aplicar = () => {
                     if (SoulManager.Instance != null)
                         SoulManager.Instance.AdicionarAlmas(80);
@@ -142,14 +142,23 @@ public class WaveBuffUI : MonoBehaviour
             buffButtons[i].gameObject.SetActive(true);
 
             if (buffTexts != null && i < buffTexts.Length && buffTexts[i] != null)
-                buffTexts[i].text = $"<b>{currentOptions[i].nome}</b>\n{currentOptions[i].descricao}";
+                buffTexts[i].text = currentOptions[i].descricao;
 
             int idx = i; // captura local para closure
             buffButtons[i].onClick.RemoveAllListeners();
             buffButtons[i].onClick.AddListener(() => SelecionarBuff(idx));
         }
 
-        if (buffPanel != null) buffPanel.SetActive(true);
+        if (buffPanel != null)
+        {
+            buffPanel.SetActive(true);
+            Debug.Log("[WaveBuffUI] Painel ativado!");
+            
+            // Garante que o Canvas está visível
+            Canvas canvas = buffPanel.GetComponentInParent<Canvas>();
+            if (canvas != null) canvas.enabled = true;
+        }
+        
         Time.timeScale = 0f; // Pausa o jogo
     }
 
@@ -166,7 +175,12 @@ public class WaveBuffUI : MonoBehaviour
         AplicarBuffsAosAliadosExistentes();
 
         // Fecha UI e retorna o jogo
-        if (buffPanel != null) buffPanel.SetActive(false);
+        if (buffPanel != null)
+        {
+            buffPanel.SetActive(false);
+            Debug.Log("[WaveBuffUI] Painel desativado!");
+        }
+        
         Time.timeScale = 1f;
 
         onBuffChosen?.Invoke();
@@ -253,5 +267,51 @@ public class WaveBuffUI : MonoBehaviour
         LichHealth lich = LichHealth.Instance;
         if (lich != null)
             lich.currentHealth = Mathf.Min(lich.maxHealth, lich.currentHealth + lich.maxHealth * percentual);
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // MÉTODOS DE DEBUG
+    // ──────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Teste rápido: ativa/desativa o painel manualmente
+    /// </summary>
+    public void DebugTogglePainel()
+    {
+        if (buffPanel == null) { Debug.LogError("[WaveBuffUI] buffPanel NÃO ESTÁ ATRIBUÍDO!"); return; }
+
+        buffPanel.SetActive(!buffPanel.activeInHierarchy);
+        Debug.Log($"[WaveBuffUI] Painel agora: {(buffPanel.activeInHierarchy ? "ATIVO" : "INATIVO")}");
+    }
+
+    /// <summary>
+    /// Teste: simula o fim de uma onda
+    /// </summary>
+    public void DebugMostrarBuffs()
+    {
+        Debug.Log("[WaveBuffUI] Chamando MostrarEscolha para teste...");
+        MostrarEscolha(() => Debug.Log("[WaveBuffUI] Buff escolhido!"));
+    }
+
+    /// <summary>
+    /// Verifica a configuração do painel
+    /// </summary>
+    public void DebugVerificarConfiguracao()
+    {
+        Debug.Log("=== [WaveBuffUI] DIAGNÓSTICO ===");
+        Debug.Log($"buffPanel atribuído? {(buffPanel != null ? "SIM" : "NÃO")}");
+        
+        if (buffPanel != null)
+        {
+            Debug.Log($"  → buffPanel ativo? {buffPanel.activeInHierarchy}");
+            Debug.Log($"  → buffPanel.SetActive habilitado? {buffPanel.GetComponent<CanvasGroup>()?.blocksRaycasts ?? true}");
+            
+            Canvas canvas = buffPanel.GetComponentInParent<Canvas>();
+            Debug.Log($"  → Canvas encontrado? {(canvas != null ? "SIM" : "NÃO")}");
+            if (canvas != null) Debug.Log($"    - Canvas.enabled? {canvas.enabled}");
+        }
+
+        Debug.Log($"buffButtons configurados? {(buffButtons.Length > 0 && buffButtons[0] != null ? "SIM" : "NÃO")}");
+        Debug.Log($"buffTexts configurados? {(buffTexts.Length > 0 && buffTexts[0] != null ? "SIM" : "NÃO")}");
     }
 }

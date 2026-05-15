@@ -88,7 +88,7 @@ public class CardSystem : MonoBehaviour
         worldPos.z = 0f;
 
         Collider2D hit = Physics2D.OverlapCircle(worldPos, spawnCheckRadius);
-        if (hit != null)
+        if (hit != null && !hit.isTrigger) 
         {
             Debug.Log("Local bloqueado por: " + hit.gameObject.name);
             return;
