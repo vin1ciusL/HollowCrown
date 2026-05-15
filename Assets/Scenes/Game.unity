@@ -256,7 +256,6 @@ GameObject:
   - component: {fileID: 1201448491}
   - component: {fileID: 1201448490}
   - component: {fileID: 1201448489}
-  - component: {fileID: 1201448488}
   - component: {fileID: 1201448495}
   m_Layer: 5
   m_Name: CardLich
@@ -284,20 +283,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -323}
   m_SizeDelta: {x: 100, y: 140}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1201448488
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1201448486}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 700c5344054797741b0354c0c899b145, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LichHealth
-  maxHealth: 80
-  currentHealth: 0
 --- !u!114 &1201448489
 MonoBehaviour:
   m_ObjectHideFlags: 0
