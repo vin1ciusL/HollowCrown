@@ -177,7 +177,7 @@ MonoBehaviour:
   unstuckForce: 4
   obstacleLayer:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 128
   showGizmos: 1
 --- !u!114 &-6102911277391598528
 MonoBehaviour:

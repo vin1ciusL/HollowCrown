@@ -170,7 +170,7 @@ MonoBehaviour:
   unstuckForce: 3
   obstacleLayer:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 0
 --- !u!114 &1864122791509648604
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -185,3 +185,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LichHealth
   maxHealth: 80
   currentHealth: 0
+  invulnerabilityDuration: 0.5
