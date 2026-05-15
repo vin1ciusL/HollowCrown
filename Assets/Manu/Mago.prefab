@@ -157,7 +157,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.0003499426, y: -0.10985683}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -167,7 +167,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.3, y: 0.3}
+  m_Size: {x: 0.11037468, y: 0.046699643}
   m_EdgeRadius: 0
 --- !u!114 &4875935418699909453
 MonoBehaviour:
@@ -179,7 +179,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9e2b57aa30cf0814ca4b2f8289690289, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MageAttack
   fireballPrefab: {fileID: 4260329344143187683, guid: db1ef39b187cf8641b3b7eb19272fad4, type: 3}
   firePoint: {fileID: 6484564403987031652}
@@ -190,6 +190,24 @@ MonoBehaviour:
   minDistance: 6
   mapMin: {x: 0, y: 0}
   mapMax: {x: 0, y: 0}
+--- !u!114 &7777000000000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2195004351814422930}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b153251a1ce0ca741b14ff2737278923, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VillainHealth
+  maxHealth: 30
+  currentHealth: 30
+  attackDamage: 0
+  attackRange: 0
+  attackCooldown: 1
+  almasRecompensa: 15
 --- !u!1 &6659322898675249594
 GameObject:
   m_ObjectHideFlags: 0
@@ -221,21 +239,3 @@ Transform:
   m_Children: []
   m_Father: {fileID: 3408429276668492530}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7777000000000000001
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2195004351814422930}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b153251a1ce0ca741b14ff2737278923, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::VillainHealth
-  maxHealth: 30
-  currentHealth: 30
-  attackDamage: 0
-  attackRange: 0
-  attackCooldown: 1
-  almasRecompensa: 15

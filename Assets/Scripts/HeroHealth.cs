@@ -63,14 +63,6 @@ public class HeroHealth : MonoBehaviour
                 return;
             }
         }
-
-        MageHealth mage = FindAnyObjectByType<MageHealth>();
-        if (mage != null && mage.gameObject.activeSelf &&
-            Vector2.Distance(transform.position, mage.transform.position) <= attackRange)
-        {
-            mage.TakeDamage(attackDamage);
-            heroAnimator?.TriggerAttack();
-        }
     }
 
     public void TakeDamage(float damage)

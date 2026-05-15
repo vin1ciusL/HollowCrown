@@ -205,8 +205,6 @@ public class VillainSpawner : MonoBehaviour
             if (v != null) Destroy(v.gameObject);
         foreach (var v in Object.FindObjectsByType<GolemHealth>())
             if (v != null) Destroy(v.gameObject);
-        foreach (var v in Object.FindObjectsByType<MageHealth>())
-            if (v != null) Destroy(v.gameObject);
         foreach (var v in Object.FindObjectsByType<LichHealth>())
             if (v != null) Destroy(v.gameObject);
         foreach (var v in Object.FindObjectsByType<VillainHealth>())

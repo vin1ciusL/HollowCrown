@@ -60,14 +60,6 @@ public class GolemHealth : MonoBehaviour
                 return;
             }
         }
-
-        MageHealth mage = FindAnyObjectByType<MageHealth>();
-        if (mage != null && mage.gameObject.activeSelf &&
-            Vector2.Distance(transform.position, mage.transform.position) <= aoeRadius)
-        {
-            attackTimer = 0f;
-            AoeAttack();
-        }
     }
 
     void AoeAttack()
@@ -79,11 +71,6 @@ public class GolemHealth : MonoBehaviour
             if (Vector2.Distance(transform.position, villain.transform.position) <= aoeRadius)
                 villain.TakeDamage(attackDamage);
         }
-
-        MageHealth mage = FindAnyObjectByType<MageHealth>();
-        if (mage != null && mage.gameObject.activeSelf &&
-            Vector2.Distance(transform.position, mage.transform.position) <= aoeRadius)
-            mage.TakeDamage(attackDamage);
     }
 
     public void TakeDamage(float damage)

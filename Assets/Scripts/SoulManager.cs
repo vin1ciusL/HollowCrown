@@ -18,9 +18,6 @@ public class SoulManager : MonoBehaviour
     [Tooltip("Almas regeneradas por segundo")]
     public float regeneracaoPorSegundo = 10f;
 
-    [Tooltip("Custo em almas para invocar um Herói")]
-    public int custoInvocacao = 50;
-
     // ─── Estado ──────────────────────────────────────────────────
     [Header("Estado (somente leitura no Inspector)")]
     [SerializeField] private int _almasAtuais;
@@ -91,32 +88,6 @@ public class SoulManager : MonoBehaviour
         }
     }
 
-    // ─── API Pública ─────────────────────────────────────────────
-
-    /// <summary>
-    /// Verifica se o jogador tem almas suficientes para invocar um Herói.
-    /// </summary>
-    public bool PodeInvocar()
-    {
-        return AlmasAtuais >= custoInvocacao;
-    }
-
-    /// <summary>
-    /// Tenta gastar almas para invocar um Herói.
-    /// Retorna true se o gasto foi realizado, false se não havia almas suficientes.
-    /// </summary>
-    public bool TentarGastarParaInvocacao()
-    {
-        if (!PodeInvocar())
-        {
-            Debug.Log($"[SoulManager] Almas insuficientes! Atual: {AlmasAtuais}, Custo: {custoInvocacao}");
-            return false;
-        }
-
-        AlmasAtuais -= custoInvocacao;
-        Debug.Log($"[SoulManager] Invocação realizada! Almas restantes: {AlmasAtuais}");
-        return true;
-    }
 
     /// <summary>
     /// Gasta uma quantidade arbitrária de almas.
