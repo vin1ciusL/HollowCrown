@@ -15,6 +15,9 @@ EditorBuildSettings:
     path: Assets/Scenes/ComoJogar.unity
     guid: 6dd69014776c7674eaadd4fafda6718b
   - enabled: 0
+    path: Assets/Scenes/GameOver.unity
+    guid: 863622591fb3185408dc19d369c3d8ff
+  - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
   m_configObjects:
