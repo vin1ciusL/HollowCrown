@@ -40,6 +40,9 @@ public class VillainController : MonoBehaviour
     private float unstuckCooldown = 0f;
     private Vector2 escapeDirection;
 
+    // Knockback
+    private float knockbackTimer = 0f;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -115,6 +118,15 @@ public class VillainController : MonoBehaviour
 
     void FixedUpdate()
     {
+        // Knockback recente: deixa a velocidade aplicada decair naturalmente,
+        // sem sobrescrever com movimento. Drag do Rigidbody2D ou colisões
+        // amortecem o impulso.
+        if (knockbackTimer > 0f)
+        {
+            knockbackTimer -= Time.fixedDeltaTime;
+            return;
+        }
+
         // Se está em modo de escape (anti-softlock), usa o impulso
         if (unstuckCooldown > 0f)
         {
@@ -264,6 +276,20 @@ public class VillainController : MonoBehaviour
     void OnHeroLost()
     {
         hero = null;
+    }
+
+    /// <summary>
+    /// Aplica knockback no vilão. Sobrescreve a velocidade atual e bloqueia
+    /// o movimento da IA por <paramref name="duracao"/> segundos, deixando o
+    /// impulso decair naturalmente.
+    /// </summary>
+    public void AplicarKnockback(Vector2 direcao, float forca, float duracao = 0.2f)
+    {
+        if (forca <= 0f) return;
+        if (rb == null) return;
+
+        rb.linearVelocity = direcao.normalized * forca;
+        knockbackTimer = duracao;
     }
 
     void OnDrawGizmosSelected()

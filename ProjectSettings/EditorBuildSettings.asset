@@ -14,7 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/ComoJogar.unity
     guid: 6dd69014776c7674eaadd4fafda6718b
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/GameOver.unity
     guid: 863622591fb3185408dc19d369c3d8ff
   - enabled: 0

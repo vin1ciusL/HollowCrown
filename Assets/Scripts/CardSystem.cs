@@ -204,6 +204,10 @@ public class CardSystem : MonoBehaviour
         GameObject instancia = Instantiate(carta.prefab, worldPos, Quaternion.identity);
         instanciasInvocadas.Add(instancia);
 
+        // Aplica buffs acumulados de fases anteriores
+        if (WaveBuffUI.Instance != null)
+            WaveBuffUI.Instance.AplicarBuffsA(instancia);
+
         Debug.Log($"[CardSystem] {carta.nome} invocado em {worldPos} (custo: {carta.custoAlmas} almas)");
 
         // Deseleciona a carta após invocar

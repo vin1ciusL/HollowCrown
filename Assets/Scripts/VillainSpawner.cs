@@ -45,8 +45,10 @@ public class VillainSpawner : MonoBehaviour
     void OnEnable()
     {
         cam = Camera.main;
+        ondaAtual = 0;
+        trocando = false;
 
-        // Reseta almas para o valor inicial da fase
+        // Reseta almas para o valor inicial da fase (já considera bônus de buffs)
         if (SoulManager.Instance != null)
             SoulManager.Instance.ResetarParaFase();
 
@@ -59,8 +61,8 @@ public class VillainSpawner : MonoBehaviour
 
         if (ondaAtual >= inimigosPorturno.Length)
         {
-            Debug.Log("Vitória! Todas as ondas concluídas.");
-            StartCoroutine(FinalizarJogo());
+            Debug.Log("[VillainSpawner] Todas as ondas concluídas — iniciando fim de fase.");
+            StartCoroutine(FinalizarFase());
             return;
         }
 
@@ -68,7 +70,7 @@ public class VillainSpawner : MonoBehaviour
         int qtdMago = (magosPorturno != null && ondaAtual < magosPorturno.Length) ? magosPorturno[ondaAtual] : 0;
         if (magoPrefab == null) qtdMago = 0;
 
-        Debug.Log($"Onda {ondaAtual + 1} — {qtdVilao} vilões + {qtdMago} magos");
+        Debug.Log($"[VillainSpawner] Onda {ondaAtual + 1}/{inimigosPorturno.Length} — {qtdVilao} vilões + {qtdMago} magos");
         inimigosVivos = qtdVilao + qtdMago;
         StartCoroutine(SpawnarTurno(qtdVilao, qtdMago));
     }
@@ -106,12 +108,6 @@ public class VillainSpawner : MonoBehaviour
             vh.OnMorte += OnInimigoMorreu;
     }
 
-    /// <summary>
-    /// Tenta encontrar uma posição de spawn que esteja:
-    /// 1) Dentro dos limites do viewport da câmera (com margem)
-    /// 2) Dentro do Collider do mapa (se atribuído)
-    /// 3) Livre de obstáculos físicos
-    /// </summary>
     Vector3 EncontrarPosicaoSegura()
     {
         bool useMapBounds = mapMin != mapMax;
@@ -161,53 +157,65 @@ public class VillainSpawner : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Avança para a próxima onda. NÃO mostra mais buff entre ondas —
+    /// o buff é dado apenas ao final da fase (em FinalizarFase).
+    /// </summary>
     IEnumerator FinalizarTurno()
     {
         yield return new WaitForSeconds(delayEntreOndas);
         ondaAtual++;
-
-        // Se ainda há ondas restantes, mostra a tela de buff
-        if (ondaAtual < inimigosPorturno.Length)
-        {
-            if (WaveBuffUI.Instance != null)
-            {
-                // Mostra UI de buff e espera o jogador escolher
-                WaveBuffUI.Instance.MostrarEscolha(() =>
-                {
-                    // Callback: após o jogador escolher, inicia o próximo turno
-                    IniciarTurno();
-                });
-            }
-            else
-            {
-                // Sem sistema de buff configurado — prossegue normalmente
-                IniciarTurno();
-            }
-        }
-        else
-        {
-            IniciarTurno(); // vai chamar FinalizarJogo()
-        }
+        IniciarTurno();
     }
 
-    IEnumerator FinalizarJogo()
+    /// <summary>
+    /// Chamado quando todas as ondas da fase terminam.
+    /// Fluxo: pequeno delay → escolha de buff → fade out → troca de mapa → fade in.
+    /// </summary>
+    IEnumerator FinalizarFase()
     {
-        yield return new WaitForSeconds(delayAntesDeTrocar);
+        yield return new WaitForSecondsRealtime(delayAntesDeTrocar);
 
+        // 1) Buff de fim de fase (espera o jogador escolher)
+        if (WaveBuffUI.Instance != null)
+        {
+            bool buffEscolhido = false;
+            WaveBuffUI.Instance.MostrarEscolha(() => buffEscolhido = true);
+            yield return new WaitUntil(() => buffEscolhido);
+        }
+
+        // 2) Se não há próximo mapa, vitória final — sem transição
         if (proximoMapa == null)
         {
             Debug.Log("[VillainSpawner] Vitória final — sem próximo mapa.");
             yield break;
         }
 
+        // 3) Transição com fade. IMPORTANTE: a coroutine roda no PhaseTransition (singleton
+        //    persistente) porque ExecutarTrocaDeMapa desativa mapaAtual — se a coroutine
+        //    rodasse neste VillainSpawner (filho de mapaAtual), morreria antes do fade in.
+        if (PhaseTransition.Instance != null)
+        {
+            PhaseTransition.Instance.StartCoroutine(
+                PhaseTransition.Instance.FadeOutInRoutine(ExecutarTrocaDeMapa));
+        }
+        else
+        {
+            // Fallback sem fade
+            ExecutarTrocaDeMapa();
+        }
+    }
+
+    void ExecutarTrocaDeMapa()
+    {
         // Destrói invocados e vilões remanescentes do mapa anterior
-        foreach (var v in Object.FindObjectsByType<HeroHealth>())
+        foreach (var v in Object.FindObjectsByType<HeroHealth>(FindObjectsSortMode.None))
             if (v != null) Destroy(v.gameObject);
-        foreach (var v in Object.FindObjectsByType<GolemHealth>())
+        foreach (var v in Object.FindObjectsByType<GolemHealth>(FindObjectsSortMode.None))
             if (v != null) Destroy(v.gameObject);
-        foreach (var v in Object.FindObjectsByType<LichHealth>())
+        foreach (var v in Object.FindObjectsByType<LichHealth>(FindObjectsSortMode.None))
             if (v != null) Destroy(v.gameObject);
-        foreach (var v in Object.FindObjectsByType<VillainHealth>())
+        foreach (var v in Object.FindObjectsByType<VillainHealth>(FindObjectsSortMode.None))
             if (v != null) Destroy(v.gameObject);
 
         if (mapaAtual != null) mapaAtual.SetActive(false);

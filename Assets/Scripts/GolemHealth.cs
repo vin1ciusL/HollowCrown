@@ -12,6 +12,12 @@ public class GolemHealth : MonoBehaviour
     public float aoeRadius = 2.5f;
     public float attackCooldown = 1.5f;
 
+    [Header("Knockback")]
+    [Tooltip("Força do empurrão aplicado a cada vilão na AOE (MÉDIO)")]
+    public float knockbackForce = 7f;
+    [Tooltip("Duração em segundos do bloqueio de movimento do vilão")]
+    public float knockbackDuration = 0.25f;
+
     [Header("Invulnerabilidade")]
     public float invulnerabilityDuration = 0.5f;
 
@@ -69,8 +75,20 @@ public class GolemHealth : MonoBehaviour
         foreach (VillainHealth villain in new List<VillainHealth>(VillainHealth.All))
         {
             if (Vector2.Distance(transform.position, villain.transform.position) <= aoeRadius)
+            {
                 villain.TakeDamage(attackDamage);
+                AplicarKnockback(villain);
+            }
         }
+    }
+
+    void AplicarKnockback(VillainHealth villain)
+    {
+        if (villain == null || knockbackForce <= 0f) return;
+        VillainController vc = villain.GetComponent<VillainController>();
+        if (vc == null) return;
+        Vector2 dir = (Vector2)(villain.transform.position - transform.position);
+        vc.AplicarKnockback(dir, knockbackForce, knockbackDuration);
     }
 
     public void TakeDamage(float damage)

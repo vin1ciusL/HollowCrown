@@ -18,6 +18,9 @@ public class SoulManager : MonoBehaviour
     [Tooltip("Almas regeneradas por segundo")]
     public float regeneracaoPorSegundo = 10f;
 
+    [Tooltip("Bônus permanente de almas iniciais — aumentado por buffs entre fases")]
+    public int bonusAlmasIniciais = 0;
+
     // ─── Estado ──────────────────────────────────────────────────
     [Header("Estado (somente leitura no Inspector)")]
     [SerializeField] private int _almasAtuais;
@@ -62,7 +65,7 @@ public class SoulManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
         // Inicializa almas para a primeira fase
-        _almasAtuais = almasIniciais;
+        _almasAtuais = almasIniciais + bonusAlmasIniciais;
     }
 
     void Update()
@@ -120,7 +123,21 @@ public class SoulManager : MonoBehaviour
     public void ResetarParaFase()
     {
         _acumuladorRegenFracionario = 0f;
+        int total = almasIniciais + bonusAlmasIniciais;
+        AlmasAtuais = total;
+        Debug.Log($"[SoulManager] Almas resetadas para {total} ({almasIniciais} base + {bonusAlmasIniciais} bônus)");
+    }
+
+    /// <summary>
+    /// Reset COMPLETO: zera bônus acumulados e restaura regeneração padrão.
+    /// Chame ao iniciar uma partida nova (do menu ou retry no Game Over).
+    /// </summary>
+    public void ResetCompleto()
+    {
+        bonusAlmasIniciais = 0;
+        regeneracaoPorSegundo = 10f;
+        _acumuladorRegenFracionario = 0f;
         AlmasAtuais = almasIniciais;
-        Debug.Log($"[SoulManager] Almas resetadas para {almasIniciais} (início de fase)");
+        Debug.Log("[SoulManager] Reset COMPLETO — partida nova.");
     }
 }

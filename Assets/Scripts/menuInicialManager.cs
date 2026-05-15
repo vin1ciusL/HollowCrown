@@ -5,6 +5,7 @@ public class MenuInicialManager : MonoBehaviour
 {
     public void StartGame()
     {
+        ResetEstadoPersistente();
         SceneManager.LoadScene("Game");
     }
 
@@ -15,6 +16,13 @@ public class MenuInicialManager : MonoBehaviour
 
     public void BackToMenu()
     {
+        ResetEstadoPersistente();
         SceneManager.LoadScene("menuinicial");
+    }
+
+    void ResetEstadoPersistente()
+    {
+        SoulManager.Instance?.ResetCompleto();
+        WaveBuffUI.Instance?.ResetCompleto();
     }
 }

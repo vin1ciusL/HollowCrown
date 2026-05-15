@@ -12,6 +12,12 @@ public class HeroHealth : MonoBehaviour
     public float attackRange = 1.5f;
     public float attackCooldown = 1f;
 
+    [Header("Knockback")]
+    [Tooltip("Força do empurrão aplicado ao vilão atingido (LEVE)")]
+    public float knockbackForce = 4f;
+    [Tooltip("Duração em segundos do bloqueio de movimento do vilão")]
+    public float knockbackDuration = 0.15f;
+
     [Header("Invulnerabilidade")]
     [Tooltip("Tempo (s) imune a dano logo após levar um hit")]
     public float invulnerabilityDuration = 0.5f;
@@ -59,10 +65,20 @@ public class HeroHealth : MonoBehaviour
             if (Vector2.Distance(transform.position, villain.transform.position) <= attackRange)
             {
                 villain.TakeDamage(attackDamage);
+                AplicarKnockback(villain);
                 heroAnimator?.TriggerAttack();
                 return;
             }
         }
+    }
+
+    void AplicarKnockback(VillainHealth villain)
+    {
+        if (villain == null || knockbackForce <= 0f) return;
+        VillainController vc = villain.GetComponent<VillainController>();
+        if (vc == null) return;
+        Vector2 dir = (Vector2)(villain.transform.position - transform.position);
+        vc.AplicarKnockback(dir, knockbackForce, knockbackDuration);
     }
 
     public void TakeDamage(float damage)
