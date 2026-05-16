@@ -5,7 +5,8 @@ public class VillainHealth : MonoBehaviour
 {
     public static readonly List<VillainHealth> All = new();
 
-    public event System.Action OnMorte; // <- NOVO
+    public event System.Action OnMorte;
+    public event System.Action<float, MonoBehaviour> OnDanoCausado;
 
     [Header("Vida")]
     public float maxHealth = 10f;
@@ -94,6 +95,7 @@ public class VillainHealth : MonoBehaviour
     {
         if (alvo is HeroHealth h) h.TakeDamage(attackDamage);
         else if (alvo is LichHealth l) l.TakeDamage(attackDamage);
+        OnDanoCausado?.Invoke(attackDamage, alvo);
     }
 
     void ApplyPendingDamage()

@@ -95,6 +95,17 @@ public class HeroHealth : MonoBehaviour
         }
     }
 
+    // Dano de DoT — não possui frames de invulnerabilidade
+    public void TakeDotDamage(float damage)
+    {
+        currentHealth -= damage;
+        if (currentHealth <= 0)
+        {
+            if (PlayerLives.Instance != null) PlayerLives.Instance.PerderVida();
+            gameObject.SetActive(false);
+        }
+    }
+
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.green;

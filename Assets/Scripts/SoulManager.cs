@@ -4,7 +4,7 @@ using UnityEngine;
 /// Gerenciador global de Almas (Singleton).
 /// Fonte única de verdade para a quantidade atual de almas do jogador.
 /// Persiste entre cenas com DontDestroyOnLoad.
-/// </summary>
+/// </summary> 
 public class SoulManager : MonoBehaviour
 {
     // ─── Singleton ───────────────────────────────────────────────
@@ -21,6 +21,9 @@ public class SoulManager : MonoBehaviour
     [Tooltip("Bônus permanente de almas iniciais — aumentado por buffs entre fases")]
     public int bonusAlmasIniciais = 0;
 
+    [Tooltip("Máximo de almas que o jogador pode ter")]
+    public int maxAlmas = 999;
+
     // ─── Estado ──────────────────────────────────────────────────
     [Header("Estado (somente leitura no Inspector)")]
     [SerializeField] private int _almasAtuais;
@@ -34,8 +37,9 @@ public class SoulManager : MonoBehaviour
         get => _almasAtuais;
         private set
         {
-            if (_almasAtuais == value) return;
-            _almasAtuais = value;
+            int clamped = Mathf.Clamp(value, 0, maxAlmas);
+            if (_almasAtuais == clamped) return;
+            _almasAtuais = clamped;
             OnAlmasChanged?.Invoke(_almasAtuais);
         }
     }
@@ -65,7 +69,7 @@ public class SoulManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
         // Inicializa almas para a primeira fase
-        _almasAtuais = almasIniciais + bonusAlmasIniciais;
+        _almasAtuais = Mathf.Clamp(almasIniciais + bonusAlmasIniciais, 0, maxAlmas);
     }
 
     void Update()
@@ -87,7 +91,7 @@ public class SoulManager : MonoBehaviour
         {
             int ganho = Mathf.FloorToInt(_acumuladorRegenFracionario);
             _acumuladorRegenFracionario -= ganho;
-            AlmasAtuais += ganho;
+                AlmasAtuais += ganho;
         }
     }
 

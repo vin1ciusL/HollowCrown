@@ -305,7 +305,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 2.98, y: 0.14, z: 0}
-  m_LocalScale: {x: 6, y: 6, z: 1}
+  m_LocalScale: {x: 0.7596877, y: 0.7596877, z: 0.7596877}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 920415046949654278}
@@ -352,7 +352,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8fcc30aef5cbe04faea76e5d1cc51ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HeroController
-  moveSpeed: 5
+  moveSpeed: 3
   attackRange: 6
   stopDistance: 0.8
   showGizmos: 1
@@ -391,6 +391,8 @@ MonoBehaviour:
   attackDamage: 10
   attackRange: 1
   attackCooldown: 1
+  knockbackForce: 4
+  knockbackDuration: 0.15
   invulnerabilityDuration: 0.5
 --- !u!61 &8379933530301869058
 BoxCollider2D:
@@ -426,7 +428,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.008758875, y: -0.06983059}
+  m_Offset: {x: -0.044808686, y: -0.45950946}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -436,7 +438,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.093199596, y: 0.07009506}
+  m_Size: {x: 0.5635607, y: 0.27952605}
   m_EdgeRadius: 0
 --- !u!114 &6016792671023139838
 MonoBehaviour:

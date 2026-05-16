@@ -17,7 +17,7 @@ public class SoulCounterUI : MonoBehaviour
     public TextMeshProUGUI textoAlmas;
 
     [Tooltip("Formato do texto. Use {0} no lugar do número.")]
-    public string formato = "Almas: {0}";
+    public string formato = "{0}";
 
     private bool subscrito = false;
 

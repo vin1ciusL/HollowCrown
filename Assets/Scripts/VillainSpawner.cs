@@ -1,8 +1,14 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+
+public enum TipoMapa { Externo, Dungeon, Royal }
 
 public class VillainSpawner : MonoBehaviour
 {
+    [Header("Mapa")]
+    public TipoMapa tipoMapa = TipoMapa.Externo;
+
     [Header("Spawn")]
     public GameObject villainPrefab;
     public GameObject magoPrefab;
@@ -18,9 +24,16 @@ public class VillainSpawner : MonoBehaviour
     public float spawnMargin = 0.5f;
 
     [Header("Ondas")]
-    public int[] inimigosPorturno = { 2, 3, 4 };
-    public int[] magosPorturno = { 0, 1, 2 };
-    public float delayEntreOndas = 3f;
+    public int[] inimigosPorturno = { 3, 4, 5, 6, 8, 10 };
+    public int[] magosPorturno    = { 0, 0, 1, 1, 2,  2 };
+    public float delayEntreOndas  = 3f;
+
+    [Header("Elites")]
+    [Tooltip("Chance (0-1) de qualquer inimigo virar elite. Definido automaticamente pelo TipoMapa via ContextMenu.")]
+    [Range(0f, 1f)]
+    public float chanceElite = 0.10f;
+    [Tooltip("Máximo de elites por onda")]
+    public int maxElitesPorOnda = 2;
 
     [Header("Próxima Fase")]
     public GameObject mapaAtual;
@@ -38,17 +51,61 @@ public class VillainSpawner : MonoBehaviour
     public Collider2D mapBounds;
 
     private Camera cam;
-    private int ondaAtual = 0;
-    private int inimigosVivos = 0;
-    private bool trocando = false;
+    private int ondaAtual      = 0;
+    private int inimigosVivos  = 0;
+    private bool trocando      = false;
+    private int elitesNestaOnda = 0;
+
+    // Pool de tipos de elite fixo e alocado uma única vez
+    private static readonly TipoElite[] POOL_ELITES =
+    {
+        TipoElite.Frenetico,
+        TipoElite.Colosso,
+        TipoElite.Sanguessuga,
+        TipoElite.Volatil,
+        TipoElite.Venenoso
+    };
+
+    // ─── Configuração automática via ContextMenu ────────────────────────────
+
+    [ContextMenu("Auto-configurar: Externo (6 ondas / 10% elite)")]
+    void ConfigurarExterno()
+    {
+        tipoMapa          = TipoMapa.Externo;
+        chanceElite       = 0.10f;
+        maxElitesPorOnda  = 2;
+        inimigosPorturno  = new int[] { 3, 4, 5,  6,  8, 10 };
+        magosPorturno     = new int[] { 0, 0, 1,  1,  2,  2 };
+    }
+
+    [ContextMenu("Auto-configurar: Dungeon (8 ondas / 20% elite)")]
+    void ConfigurarDungeon()
+    {
+        tipoMapa          = TipoMapa.Dungeon;
+        chanceElite       = 0.20f;
+        maxElitesPorOnda  = 3;
+        inimigosPorturno  = new int[] { 4, 5, 6,  7,  8,  9, 11, 13 };
+        magosPorturno     = new int[] { 0, 1, 1,  2,  2,  2,  3,  3 };
+    }
+
+    [ContextMenu("Auto-configurar: Royal (10 ondas / 30% elite)")]
+    void ConfigurarRoyal()
+    {
+        tipoMapa          = TipoMapa.Royal;
+        chanceElite       = 0.30f;
+        maxElitesPorOnda  = 4;
+        inimigosPorturno  = new int[] { 5, 6, 7,  8,  9, 10, 11, 13, 14, 16 };
+        magosPorturno     = new int[] { 0, 1, 1,  2,  2,  3,  3,  3,  4,  4 };
+    }
+
+    // ─── Ciclo de vida ──────────────────────────────────────────────────────
 
     void OnEnable()
     {
         cam = Camera.main;
         ondaAtual = 0;
-        trocando = false;
+        trocando  = false;
 
-        // Reseta almas para o valor inicial da fase (já considera bônus de buffs)
         if (SoulManager.Instance != null)
             SoulManager.Instance.ResetarParaFase();
 
@@ -67,7 +124,7 @@ public class VillainSpawner : MonoBehaviour
         }
 
         int qtdVilao = inimigosPorturno[ondaAtual];
-        int qtdMago = (magosPorturno != null && ondaAtual < magosPorturno.Length) ? magosPorturno[ondaAtual] : 0;
+        int qtdMago  = (magosPorturno != null && ondaAtual < magosPorturno.Length) ? magosPorturno[ondaAtual] : 0;
         if (magoPrefab == null) qtdMago = 0;
 
         Debug.Log($"[VillainSpawner] Onda {ondaAtual + 1}/{inimigosPorturno.Length} — {qtdVilao} vilões + {qtdMago} magos");
@@ -77,19 +134,21 @@ public class VillainSpawner : MonoBehaviour
 
     IEnumerator SpawnarTurno(int qtdVilao, int qtdMago)
     {
+        elitesNestaOnda = 0;
+
         for (int i = 0; i < qtdVilao; i++)
         {
-            SpawnInimigo(villainPrefab);
+            SpawnInimigo(villainPrefab, podeSerElite: true);
             yield return new WaitForSeconds(delayEntreSpawns);
         }
         for (int i = 0; i < qtdMago; i++)
         {
-            SpawnInimigo(magoPrefab);
+            SpawnInimigo(magoPrefab, podeSerElite: false);
             yield return new WaitForSeconds(delayEntreSpawns);
         }
     }
 
-    void SpawnInimigo(GameObject prefab)
+    void SpawnInimigo(GameObject prefab, bool podeSerElite)
     {
         if (prefab == null) return;
 
@@ -97,16 +156,58 @@ public class VillainSpawner : MonoBehaviour
         if (spawnPos == Vector3.zero)
         {
             Debug.LogWarning("[VillainSpawner] Não foi possível encontrar posição segura para spawn!");
-            spawnPos = cam.transform.position;
+            spawnPos   = cam.transform.position;
             spawnPos.z = 0f;
         }
 
         GameObject v = Instantiate(prefab, spawnPos, Quaternion.identity);
 
+        if (podeSerElite && elitesNestaOnda < maxElitesPorOnda && Random.value < chanceElite)
+            TornarElite(v);
+
         VillainHealth vh = v.GetComponent<VillainHealth>();
         if (vh != null)
             vh.OnMorte += OnInimigoMorreu;
     }
+
+    // ─── Sistema de elite ───────────────────────────────────────────────────
+
+    void TornarElite(GameObject inimigo)
+    {
+        int maxMods = tipoMapa switch
+        {
+            TipoMapa.Dungeon => 2,
+            TipoMapa.Royal   => 3,
+            _                => 1
+        };
+
+        // Seleciona modificadores únicos aleatoriamente
+        var pool      = new List<TipoElite>(POOL_ELITES);
+        var escolhidos = new List<TipoElite>();
+
+        // 1º modifier: garantido
+        int idx = Random.Range(0, pool.Count);
+        escolhidos.Add(pool[idx]);
+        pool.RemoveAt(idx);
+
+        // Modifiers extras: 50% de chance cada, até o limite da fase
+        for (int i = 1; i < maxMods && pool.Count > 0; i++)
+        {
+            if (Random.value >= 0.5f) break;
+            idx = Random.Range(0, pool.Count);
+            escolhidos.Add(pool[idx]);
+            pool.RemoveAt(idx);
+        }
+
+        EliteModifier elite = inimigo.AddComponent<EliteModifier>();
+        elite.modificadores = escolhidos.ToArray();
+        elite.AplicarModificadores();
+        elitesNestaOnda++;
+
+        Debug.Log($"[VillainSpawner] Elite onda {ondaAtual + 1} — {escolhidos.Count} mod(s): {string.Join("+", escolhidos)}");
+    }
+
+    // ─── Posição segura ─────────────────────────────────────────────────────
 
     Vector3 EncontrarPosicaoSegura()
     {
@@ -128,7 +229,7 @@ public class VillainSpawner : MonoBehaviour
             {
                 float vx = Random.Range(viewportMargin, 1f - viewportMargin);
                 float vy = Random.Range(viewportMargin, 1f - viewportMargin);
-                worldPos = cam.ViewportToWorldPoint(new Vector3(vx, vy, 0));
+                worldPos   = cam.ViewportToWorldPoint(new Vector3(vx, vy, 0));
                 worldPos.z = 0f;
             }
 
@@ -145,6 +246,8 @@ public class VillainSpawner : MonoBehaviour
         return Vector3.zero;
     }
 
+    // ─── Controle de ondas ──────────────────────────────────────────────────
+
     void OnInimigoMorreu()
     {
         if (trocando) return;
@@ -157,10 +260,6 @@ public class VillainSpawner : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Avança para a próxima onda. NÃO mostra mais buff entre ondas —
-    /// o buff é dado apenas ao final da fase (em FinalizarFase).
-    /// </summary>
     IEnumerator FinalizarTurno()
     {
         yield return new WaitForSeconds(delayEntreOndas);
@@ -168,15 +267,10 @@ public class VillainSpawner : MonoBehaviour
         IniciarTurno();
     }
 
-    /// <summary>
-    /// Chamado quando todas as ondas da fase terminam.
-    /// Fluxo: pequeno delay → escolha de buff → fade out → troca de mapa → fade in.
-    /// </summary>
     IEnumerator FinalizarFase()
     {
         yield return new WaitForSecondsRealtime(delayAntesDeTrocar);
 
-        // 1) Buff de fim de fase (espera o jogador escolher)
         if (WaveBuffUI.Instance != null)
         {
             bool buffEscolhido = false;
@@ -184,16 +278,12 @@ public class VillainSpawner : MonoBehaviour
             yield return new WaitUntil(() => buffEscolhido);
         }
 
-        // 2) Se não há próximo mapa, vitória final — sem transição
         if (proximoMapa == null)
         {
             Debug.Log("[VillainSpawner] Vitória final — sem próximo mapa.");
             yield break;
         }
 
-        // 3) Transição com fade. IMPORTANTE: a coroutine roda no PhaseTransition (singleton
-        //    persistente) porque ExecutarTrocaDeMapa desativa mapaAtual — se a coroutine
-        //    rodasse neste VillainSpawner (filho de mapaAtual), morreria antes do fade in.
         if (PhaseTransition.Instance != null)
         {
             PhaseTransition.Instance.StartCoroutine(
@@ -201,14 +291,12 @@ public class VillainSpawner : MonoBehaviour
         }
         else
         {
-            // Fallback sem fade
             ExecutarTrocaDeMapa();
         }
     }
 
     void ExecutarTrocaDeMapa()
     {
-        // Destrói invocados e vilões remanescentes do mapa anterior
         foreach (var v in Object.FindObjectsByType<HeroHealth>(FindObjectsSortMode.None))
             if (v != null) Destroy(v.gameObject);
         foreach (var v in Object.FindObjectsByType<GolemHealth>(FindObjectsSortMode.None))

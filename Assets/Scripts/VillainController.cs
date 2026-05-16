@@ -24,6 +24,11 @@ public class VillainController : MonoBehaviour
     [Tooltip("Quais layers são consideradas obstáculo para desvio (ex: Obstaculos)")]
     public LayerMask obstacleLayer = ~0;
 
+    [Header("Elite")]
+    [Tooltip("Multiplicador de knockback recebido (0 = imune, 1 = normal)")]
+    [Range(0f, 1f)]
+    public float resistenciaKnockback = 1f;
+
     [Header("Debug")]
     public bool showGizmos = true;
 
@@ -288,8 +293,11 @@ public class VillainController : MonoBehaviour
         if (forca <= 0f) return;
         if (rb == null) return;
 
+        forca *= resistenciaKnockback;
+        if (forca < 0.05f) return;
+
         rb.linearVelocity = direcao.normalized * forca;
-        knockbackTimer = duracao;
+        knockbackTimer = duracao * resistenciaKnockback;
     }
 
     void OnDrawGizmosSelected()
