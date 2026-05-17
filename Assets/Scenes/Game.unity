@@ -536,10 +536,6 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2238779762979767547, guid: 65225626867695c4c87b1de8dc59459e, type: 3}
-      propertyPath: yRestauracaoEntrada
-      value: -3.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 2238779762979767547, guid: 65225626867695c4c87b1de8dc59459e, type: 3}
       propertyPath: ladosSpawn
       value: 0
       objectReference: {fileID: 0}
@@ -547,6 +543,10 @@ PrefabInstance:
       propertyPath: proximoMapa
       value: 
       objectReference: {fileID: 30204921}
+    - target: {fileID: 2238779762979767547, guid: 65225626867695c4c87b1de8dc59459e, type: 3}
+      propertyPath: yRestauracaoEntrada
+      value: -3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 2238779762979767547, guid: 65225626867695c4c87b1de8dc59459e, type: 3}
       propertyPath: layerObstaculos.m_Bits
       value: 128
@@ -639,7 +639,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6644917750768316990, guid: e61f881e19a8e5b4ba3ee79a5bc2086c, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7272523040394436037, guid: e61f881e19a8e5b4ba3ee79a5bc2086c, type: 3}
       propertyPath: proximoMapa
