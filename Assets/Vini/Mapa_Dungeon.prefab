@@ -2641,6 +2641,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9c3c0d95220b354ebf9f451cec036db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VillainSpawner
+  tipoMapa: 0
   villainPrefab: {fileID: 4064218796160921261, guid: ee0e11b841c11a74f8629892f4ddbb4f, type: 3}
   magoPrefab: {fileID: 2195004351814422930, guid: c8a6633b10dffcd40bf91294fc2cd3dc, type: 3}
   spawnOffsetY: 1.5
@@ -2652,6 +2653,8 @@ MonoBehaviour:
   inimigosPorturno: 020000000300000004000000
   magosPorturno: 000000000100000002000000
   delayEntreOndas: 3
+  chanceElite: 0.1
+  maxElitesPorOnda: 2
   mapaAtual: {fileID: 1651579918375876754}
   proximoMapa: {fileID: 0}
   posicaoCameraProximoMapa: {x: 2212.5, y: 545}
@@ -3005,7 +3008,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &417211476175361543
 Transform:
   m_ObjectHideFlags: 0
@@ -3015,7 +3018,7 @@ Transform:
   m_GameObject: {fileID: 1651579918375876754}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -11.48, y: -4.91, z: 0}
+  m_LocalPosition: {x: -9.92, y: -4.922, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

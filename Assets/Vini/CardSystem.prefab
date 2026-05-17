@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &1569977309501652773
+--- !u!1 &487149043302296973
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,12 +8,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6375279334745259324}
-  - component: {fileID: 2522136383186010943}
-  - component: {fileID: 7989272625029693733}
-  - component: {fileID: 4388962457273477952}
-  - component: {fileID: 8415752123632093858}
-  - component: {fileID: 4545776977778008346}
+  - component: {fileID: 161234921914835795}
+  - component: {fileID: 3879030374497570464}
   m_Layer: 0
   m_Name: CardSystem
   m_TagString: Untagged
@@ -21,116 +17,52 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6375279334745259324
+--- !u!4 &161234921914835795
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1569977309501652773}
+  m_GameObject: {fileID: 487149043302296973}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 2218.667, y: 548.7533, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2323.4912, y: 1196.2639, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2522136383186010943
+--- !u!114 &3879030374497570464
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1569977309501652773}
+  m_GameObject: {fileID: 487149043302296973}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 750380f3934729841af42f40f75a5a35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardSystem
-  heroPrefab: {fileID: 8738062986778764964, guid: 5a3c3da4b936e7d4d92b5cf6447f125f, type: 3}
-  cardImageHero: {fileID: 0}
-  custoHero: 30
-  golemPrefab: {fileID: 4784229693904594878, guid: dbece107cd53a3548b53b55c630f8a17, type: 3}
-  cardImageGolem: {fileID: 0}
-  custoGolem: 80
+  cartas:
+  - nome: Esqueleto
+    prefab: {fileID: 8738062986778764964, guid: 5a3c3da4b936e7d4d92b5cf6447f125f, type: 3}
+    cardImage: {fileID: 0}
+    custoAlmas: 1
+    hotkey: 0
+  - nome: Golem
+    prefab: {fileID: 4784229693904594878, guid: dbece107cd53a3548b53b55c630f8a17, type: 3}
+    cardImage: {fileID: 0}
+    custoAlmas: 1
+    hotkey: 0
+  - nome: Lich
+    prefab: {fileID: 9152701754693491037, guid: 6b5d722125bf0834093c255f82ff9530, type: 3}
+    cardImage: {fileID: 0}
+    custoAlmas: 1
+    hotkey: 0
   colorDefault: {r: 1, g: 1, b: 1, a: 1}
   colorSelected: {r: 1, g: 0, b: 0, a: 1}
+  colorInsuficiente: {r: 0.5, g: 0.5, b: 0.5, a: 0.7}
   spawnCheckRadius: 0.5
   mainCamera: {fileID: 0}
---- !u!114 &7989272625029693733
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1569977309501652773}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db3abcd38682b204d9aa778daa1fa1fb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LichCardSystem
-  lichPrefab: {fileID: 9152701754693491037, guid: 6b5d722125bf0834093c255f82ff9530, type: 3}
-  cardImage: {fileID: 0}
-  mainCamera: {fileID: 0}
-  colorDefault: {r: 1, g: 1, b: 1, a: 1}
-  colorSelected: {r: 1, g: 0, b: 0, a: 1}
-  spawnCheckRadius: 0.5
-  custoInvocacao: 120
---- !u!114 &4388962457273477952
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1569977309501652773}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9a02d73dfbc6b954c99e520bb280cffc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MageCardSystem
-  magePrefab: {fileID: 2195004351814422930, guid: c8a6633b10dffcd40bf91294fc2cd3dc, type: 3}
-  cardImage: {fileID: 0}
-  mainCamera: {fileID: 0}
-  colorDefault: {r: 1, g: 1, b: 1, a: 1}
-  colorSelected: {r: 1, g: 0, b: 0, a: 1}
-  spawnCheckRadius: 0.5
-  custoInvocacao: 100
---- !u!114 &8415752123632093858
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1569977309501652773}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db3abcd38682b204d9aa778daa1fa1fb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LichCardSystem
-  lichPrefab: {fileID: 9152701754693491037, guid: 6b5d722125bf0834093c255f82ff9530, type: 3}
-  cardImage: {fileID: 0}
-  mainCamera: {fileID: 0}
-  colorDefault: {r: 1, g: 1, b: 1, a: 1}
-  colorSelected: {r: 1, g: 0, b: 0, a: 1}
-  spawnCheckRadius: 0.5
-  custoInvocacao: 120
---- !u!114 &4545776977778008346
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1569977309501652773}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9a02d73dfbc6b954c99e520bb280cffc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MageCardSystem
-  magePrefab: {fileID: 2195004351814422930, guid: c8a6633b10dffcd40bf91294fc2cd3dc, type: 3}
-  cardImage: {fileID: 0}
-  mainCamera: {fileID: 0}
-  colorDefault: {r: 1, g: 1, b: 1, a: 1}
-  colorSelected: {r: 1, g: 0, b: 0, a: 1}
-  spawnCheckRadius: 0.5
-  custoInvocacao: 100
+  mapBounds: {fileID: 0}

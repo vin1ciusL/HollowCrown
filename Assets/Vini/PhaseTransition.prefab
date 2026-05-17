@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &7286187095502672230
+--- !u!1 &103501830725714832
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,22 +8,22 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6367123319977706187}
-  - component: {fileID: 6382064168289086489}
+  - component: {fileID: 6017158826796499352}
+  - component: {fileID: 6984609210591645788}
   m_Layer: 0
-  m_Name: WaveBuffUI
+  m_Name: PhaseTransition
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6367123319977706187
+--- !u!4 &6017158826796499352
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7286187095502672230}
+  m_GameObject: {fileID: 103501830725714832}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -32,36 +32,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6382064168289086489
+--- !u!114 &6984609210591645788
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7286187095502672230}
+  m_GameObject: {fileID: 103501830725714832}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 38ffe86cdca36204e84a2d92d0f1e448, type: 3}
+  m_Script: {fileID: 11500000, guid: 8a6b29e441a618140b07bcaf8238bed2, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WaveBuffUI
-  buffPanel: {fileID: 0}
-  buffButtons:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  buffTexts:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  buffIcons:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  persistirEntreCenas: 1
-  bonusDamage: 0
-  bonusHealth: 0
-  bonusSpeed: 0
-  multDamage: 1
-  multHealth: 1
-  multSpeed: 1
-  bonusAttackSpeed: 0
+  m_EditorClassIdentifier: Assembly-CSharp::PhaseTransition
+  fadeImage: {fileID: 0}
+  fadeOutDuration: 0.6
+  blackHoldDuration: 0.35
+  fadeInDuration: 0.6
