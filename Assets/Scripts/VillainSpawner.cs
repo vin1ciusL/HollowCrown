@@ -1,8 +1,19 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using System.Collections;
 using System.Collections.Generic;
 
 public enum TipoMapa { Externo, Dungeon, Royal }
+
+[System.Flags]
+public enum LadoSpawn
+{
+    Nenhum   = 0,
+    Cima     = 1 << 0,
+    Baixo    = 1 << 1,
+    Esquerda = 1 << 2,
+    Direita  = 1 << 3
+}
 
 public class VillainSpawner : MonoBehaviour
 {
@@ -41,13 +52,23 @@ public class VillainSpawner : MonoBehaviour
     public Vector2 posicaoCameraProximoMapa;
 
     [Header("Spawn Seguro")]
-    [Tooltip("Margem interna do viewport para não spawnar nas bordas")]
-    public float viewportMargin = 0.10f;
+    [Tooltip("Y mínimo (mundo) que o inimigo deve atingir antes de ligar a IA. Deixe em -Infinity para usar apenas os bounds. Útil quando há portas interiores que o vilão precisa atravessar antes de agir.")]
+    public float yRestauracaoEntrada = float.NegativeInfinity;
+    [Tooltip("Lados (fora dos bounds) onde os inimigos podem spawnar. Pode selecionar múltiplos.")]
+    public LadoSpawn ladosSpawn = LadoSpawn.Baixo;
+    [Tooltip("Distância FORA dos bounds onde o inimigo aparece, em unidades")]
+    [FormerlySerializedAs("offsetForaDoMapa")]
+    [FormerlySerializedAs("spawnInset")]
+    public float distanciaForaDoMapa = 1.5f;
+    [Tooltip("Pontos fixos de spawn (ex: portas). Se preenchido, IGNORA ladosSpawn e sorteia uniformemente entre eles.")]
+    public Transform[] pontosDeSpawn;
+    [Tooltip("Layer dos obstáculos (paredes). Usado pelo WallPasser para evitar restaurar colisão dentro de uma parede.")]
+    public LayerMask layerObstaculos = 1 << 7;
     [Tooltip("Raio para checar se o ponto de spawn está livre de obstáculos")]
     public float spawnCheckRadius = 0.5f;
     [Tooltip("Máximo de tentativas para encontrar posição válida")]
     public int maxSpawnAttempts = 15;
-    [Tooltip("Collider2D do mapa — se atribuído, spawn só dentro dele")]
+    [Tooltip("Collider2D do mapa — usado como bounds quando mapMin == mapMax")]
     public Collider2D mapBounds;
 
     private Camera cam;
@@ -76,6 +97,7 @@ public class VillainSpawner : MonoBehaviour
         maxElitesPorOnda  = 2;
         inimigosPorturno  = new int[] { 3, 4, 5,  6,  8, 10 };
         magosPorturno     = new int[] { 0, 0, 1,  1,  2,  2 };
+        ladosSpawn        = LadoSpawn.Baixo;
     }
 
     [ContextMenu("Auto-configurar: Dungeon (8 ondas / 20% elite)")]
@@ -162,6 +184,13 @@ public class VillainSpawner : MonoBehaviour
 
         GameObject v = Instantiate(prefab, spawnPos, Quaternion.identity);
 
+        // One-way: vilão atravessa qualquer obstáculo até entrar nos bounds,
+        // descendo/subindo na linha X do ponto de spawn (= centro da porta).
+        Vector2 boundsMin, boundsMax;
+        ObterBounds(out boundsMin, out boundsMax);
+        WallPasser passer = v.AddComponent<WallPasser>();
+        passer.Configurar(boundsMin, boundsMax, layerObstaculos, (Vector2)spawnPos, yRestauracaoEntrada);
+
         if (podeSerElite && elitesNestaOnda < maxElitesPorOnda && Random.value < chanceElite)
             TornarElite(v);
 
@@ -209,40 +238,76 @@ public class VillainSpawner : MonoBehaviour
 
     // ─── Posição segura ─────────────────────────────────────────────────────
 
+    void ObterBounds(out Vector2 boundsMin, out Vector2 boundsMax)
+    {
+        if (mapMin != mapMax)
+        {
+            boundsMin = mapMin;
+            boundsMax = mapMax;
+        }
+        else if (mapBounds != null)
+        {
+            var b = mapBounds.bounds;
+            boundsMin = b.min;
+            boundsMax = b.max;
+        }
+        else
+        {
+            Vector3 bl = cam.ViewportToWorldPoint(new Vector3(0f, 0f, 0f));
+            Vector3 tr = cam.ViewportToWorldPoint(new Vector3(1f, 1f, 0f));
+            boundsMin = new Vector2(bl.x, bl.y);
+            boundsMax = new Vector2(tr.x, tr.y);
+        }
+    }
+
     Vector3 EncontrarPosicaoSegura()
     {
-        bool useMapBounds = mapMin != mapMax;
-        Vector2 boundsMin = useMapBounds ? mapMin + Vector2.one * spawnMargin : Vector2.zero;
-        Vector2 boundsMax = useMapBounds ? mapMax - Vector2.one * spawnMargin : Vector2.zero;
-
-        for (int tentativa = 0; tentativa < maxSpawnAttempts; tentativa++)
+        // Se há pontos de spawn fixos (ex: portas), sorteia entre eles.
+        if (pontosDeSpawn != null && pontosDeSpawn.Length > 0)
         {
-            Vector3 worldPos;
-            if (useMapBounds)
+            // Filtra refs vazias para não enviesar o sorteio em slots não preenchidos.
+            var validos = new List<Transform>(pontosDeSpawn.Length);
+            foreach (var t in pontosDeSpawn)
+                if (t != null) validos.Add(t);
+
+            if (validos.Count > 0)
             {
-                worldPos = new Vector3(
-                    Random.Range(boundsMin.x, boundsMax.x),
-                    Random.Range(boundsMin.y, boundsMax.y),
-                    0f);
+                Transform escolhido = validos[Random.Range(0, validos.Count)];
+                Vector3 p = escolhido.position;
+                p.z = 0f;
+                return p;
             }
-            else
-            {
-                float vx = Random.Range(viewportMargin, 1f - viewportMargin);
-                float vy = Random.Range(viewportMargin, 1f - viewportMargin);
-                worldPos   = cam.ViewportToWorldPoint(new Vector3(vx, vy, 0));
-                worldPos.z = 0f;
-            }
-
-            if (mapBounds != null && !mapBounds.OverlapPoint(worldPos))
-                continue;
-
-            Collider2D obstruction = Physics2D.OverlapCircle(worldPos, spawnCheckRadius);
-            if (obstruction != null && !obstruction.isTrigger)
-                continue;
-
-            return worldPos;
         }
 
+        Vector2 boundsMin, boundsMax;
+        ObterBounds(out boundsMin, out boundsMax);
+
+        var ladosAtivos = new List<LadoSpawn>(4);
+        if ((ladosSpawn & LadoSpawn.Cima)     != 0) ladosAtivos.Add(LadoSpawn.Cima);
+        if ((ladosSpawn & LadoSpawn.Baixo)    != 0) ladosAtivos.Add(LadoSpawn.Baixo);
+        if ((ladosSpawn & LadoSpawn.Esquerda) != 0) ladosAtivos.Add(LadoSpawn.Esquerda);
+        if ((ladosSpawn & LadoSpawn.Direita)  != 0) ladosAtivos.Add(LadoSpawn.Direita);
+
+        if (ladosAtivos.Count == 0)
+        {
+            Debug.LogWarning("[VillainSpawner] Nenhum lado de spawn habilitado em 'ladosSpawn'.");
+            return Vector3.zero;
+        }
+
+        // Sempre retorna uma posição fora dos bounds no lado sorteado.
+        // O WallPasser cuida de fazer o vilão atravessar qualquer obstáculo até entrar.
+        LadoSpawn lado = ladosAtivos[Random.Range(0, ladosAtivos.Count)];
+        switch (lado)
+        {
+            case LadoSpawn.Cima:
+                return new Vector3(Random.Range(boundsMin.x, boundsMax.x), boundsMax.y + distanciaForaDoMapa, 0f);
+            case LadoSpawn.Baixo:
+                return new Vector3(Random.Range(boundsMin.x, boundsMax.x), boundsMin.y - distanciaForaDoMapa, 0f);
+            case LadoSpawn.Esquerda:
+                return new Vector3(boundsMin.x - distanciaForaDoMapa, Random.Range(boundsMin.y, boundsMax.y), 0f);
+            case LadoSpawn.Direita:
+                return new Vector3(boundsMax.x + distanciaForaDoMapa, Random.Range(boundsMin.y, boundsMax.y), 0f);
+        }
         return Vector3.zero;
     }
 
@@ -308,5 +373,18 @@ public class VillainSpawner : MonoBehaviour
 
         if (mapaAtual != null) mapaAtual.SetActive(false);
         proximoMapa.SetActive(true);
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        if (pontosDeSpawn == null) return;
+        Gizmos.color = new Color(1f, 0.4f, 0f, 0.9f);
+        foreach (var t in pontosDeSpawn)
+        {
+            if (t == null) continue;
+            Gizmos.DrawWireSphere(t.position, 0.4f);
+            Gizmos.DrawLine(t.position + Vector3.up * 0.4f, t.position + Vector3.down * 0.4f);
+            Gizmos.DrawLine(t.position + Vector3.left * 0.4f, t.position + Vector3.right * 0.4f);
+        }
     }
 }
