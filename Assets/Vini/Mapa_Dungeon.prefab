@@ -2644,14 +2644,16 @@ MonoBehaviour:
   tipoMapa: 0
   villainPrefab: {fileID: 4064218796160921261, guid: ee0e11b841c11a74f8629892f4ddbb4f, type: 3}
   magoPrefab: {fileID: 2195004351814422930, guid: c8a6633b10dffcd40bf91294fc2cd3dc, type: 3}
+  cavaleiroPrefab: {fileID: 2058762565798193130, guid: 47d35acac939ab2429f452395e75166d, type: 3}
   spawnOffsetY: 1.5
   delayEntreSpawns: 0.3
   delayAntesDeTrocar: 1
   mapMin: {x: -27, y: -13.5}
   mapMax: {x: -4.5, y: 0.5}
   spawnMargin: 0.5
-  inimigosPorturno: 020000000300000004000000
-  magosPorturno: 000000000100000002000000
+  inimigosPorturno: 0400000005000000060000000700000008000000090000000b0000000d000000
+  magosPorturno: 0000000001000000010000000200000002000000020000000300000003000000
+  cavaleirosPorturno: 0000000000000000000000000100000001000000020000000200000003000000
   delayEntreOndas: 3
   chanceElite: 0.1
   maxElitesPorOnda: 2
